@@ -1,0 +1,17 @@
+{
+    "name": "Salesforce User Permission Report",
+    "description": "Report to see a combination of profile and all permission sets for a user. Easy way to identify if a user has specific permissions!",
+    "version": "0.1.0",
+    "author": "Aurel Hudec",
+    "manifest_version": 3,
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://*.my.salesforce.com/*"],
+            "all_frames": true,
+            "js": ["content-script.js"]
+        }
+    ]
+}

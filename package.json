@@ -1,0 +1,26 @@
+{
+    "name": "vue-ext-test",
+    "version": "0.1.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "webpack --progress --config webpack.config.js",
+        "dev": "webpack --watch --config webpack.config.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "babel-loader": "^8.2.2",
+        "css-loader": "^5.0.1",
+        "style-loader": "^2.0.0",
+        "vue-loader": "^15.9.6",
+        "vue-style-loader": "^4.1.2",
+        "vue-template-compiler": "^2.6.12",
+        "webpack": "^5.20.1",
+        "webpack-cli": "^4.5.0"
+    },
+    "dependencies": {
+        "bootswatch": "^4.6.0",
+        "vue": "^2.6.12"
+    }
+}
