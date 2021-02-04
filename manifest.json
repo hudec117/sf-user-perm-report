@@ -4,14 +4,29 @@
     "version": "0.1.0",
     "author": "Aurel Hudec",
     "manifest_version": 3,
+    "permissions": [
+        "cookies",
+        "storage",
+        "tabs"
+    ],
+    "host_permissions": [
+        "https://*.salesforce.com/"
+    ],
     "background": {
         "service_worker": "background.js"
     },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' http://localhost:8098; object-src 'self'"
+    },
     "content_scripts": [
         {
-            "matches": ["https://*.my.salesforce.com/*"],
+            "matches": [
+                "https://*.salesforce.com/*"
+            ],
             "all_frames": true,
-            "js": ["content-script.js"]
+            "js": [
+                "content-script.js"
+            ]
         }
     ]
 }
