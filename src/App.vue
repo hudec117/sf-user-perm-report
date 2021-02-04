@@ -5,11 +5,11 @@
                 <button type="button"
                         class="btn btn-lg btn-primary"
                         v-on:click="onRunReportClick"
-                        v-bind:disabled="!ready">Run Report for {{ user.name ? user.name : '...' }}</button>
+                        v-bind:disabled="state !== 'ready'">Run Report for {{ user.name ? user.name : '...' }}</button>
             </div>
             <div class="col">
                 <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: 50%;"></div>
+                    <div class="progress-bar" role="progressbar" v-bind:style="progressBarStyle"></div>
                 </div>
             </div>
         </div>
@@ -28,6 +28,7 @@
         data() {
             return {
                 state: 'loading',
+                progress: 0,
                 serverHost: '',
                 user: {
                     id: '',
@@ -37,6 +38,11 @@
                 },
                 sessionId: ''
             };
+        },
+        computed: {
+            progressBarStyle: function() {
+                return `width: ${this.progress}%;`;
+            }
         },
         mounted: function() {
             this.initialise();
@@ -81,12 +87,20 @@
 
                 this.user.permissionSets = permissionSetRecords.map(record => record['PermissionSet']['Name']);
 
-                this.ready = 'ready';
+                this.state = 'ready';
             },
             onRunReportClick: async function() {
+                this.progress = 0;
+
                 // Read profile and permission set metadata
+                const profileDocuments = await this.$salesforceService.readMetadata('Profile', [this.user.profile]);
+                this.progress = 33;
+                const permissionSetDocuments = await this.$salesforceService.readMetadata('PermissionSet', this.user.permissionSets);
+                this.progress = 66;
 
                 // Merge metadata into one data structure
+
+                this.progress = 100;
             }
         }
     };
@@ -94,6 +108,6 @@
 
 <style>
 .progress {
-    height: 44px;
+    height: 46px;
 }
 </style>
