@@ -1,21 +1,25 @@
 <template>
     <b-container fluid>
         <b-row class="mt-3">
-            <b-col sm="auto">
-                <b-button variant="primary"
-                          size="lg"
-                          v-bind:disabled="!canRunReport"
-                          @click="onRunReportClick">
-                    {{ runReportText }}
+            <b-col sm="auto" class="pr-0">
+                <b-button variant="primary" size="lg" :disabled="!canRefreshReport" @click="onRefreshClick" title="Refresh">
+                    <b-icon-arrow-clockwise class="mr-2"></b-icon-arrow-clockwise> {{ user.name }}
                 </b-button>
             </b-col>
+            <b-col sm="3" class="pr-0">
+                <b-input type="text" size="lg" :disabled="!canRefreshReport" placeholder="Filter..."></b-input>
+            </b-col>
             <b-col>
-                <b-progress height="46px" :value="progress"></b-progress>
+                <b-progress height="46px">
+                    <b-progress-bar :value="progress.value">
+                        <h5 class="mt-1">{{ progress.text }}</h5>
+                    </b-progress-bar>
+                </b-progress>
             </b-col>
         </b-row>
         <b-row class="mt-3">
             <b-col>
-                <Table v-bind:summary="summary" />
+                <Table :summary="summary" />
             </b-col>
         </b-row>
     </b-container>
@@ -35,7 +39,10 @@
         data() {
             return {
                 state: 'loading',
-                progress: 0,
+                progress: {
+                    value: 0,
+                    text: ''
+                },
                 serverHost: '',
                 user: {
                     id: '',
@@ -48,17 +55,8 @@
             };
         },
         computed: {
-            canRunReport: function() {
+            canRefreshReport: function() {
                 return this.state === 'ready';
-            },
-            runReportText: function() {
-                if (this.state === 'loading') {
-                    return 'Run Report for ...';
-                } else if (this.state === 'ready') {
-                    return `Run Report for ${this.user.name}`;
-                } else if (this.state === 'processing') {
-                    return `Running Report for ${this.user.name}`;
-                }
             }
         },
         mounted: function() {
@@ -73,23 +71,29 @@
 
                 // Initialise session ID
                 const self = this;
-                chrome.runtime.sendMessage({ operation: 'get-session', host: this.serverHost }, function(session) {
+                chrome.runtime.sendMessage({ operation: 'get-session', host: this.serverHost }, async function(session) {
                     self.sessionId = session.id;
 
                     // Initialise Salesforce service
                     Vue.prototype.$salesforceService = new SalesforceService(self.serverHost, self.sessionId);
 
                     // Get information on user
-                    self.initialiseUserInfo();
+                    await self.initialiseUserInfo();
+
+                    // Run the report
+                    await self.runReport();
                 });
             },
             initialiseUserInfo: async function() {
+                this.progress.value = 20;
+                this.progress.text = 'Getting user info...';
+
                 // Get the users name and profile ID
-                const userQuery = `SELECT FirstName, ProfileId FROM User WHERE Id = '${this.user.id}'`;
+                const userQuery = `SELECT Username, ProfileId FROM User WHERE Id = '${this.user.id}'`;
                 const userRecords = await this.$salesforceService.query(userQuery);
                 const userRecord = userRecords[0];
 
-                this.user.name = userRecord['FirstName'];
+                this.user.name = userRecord['Username'];
 
                 // Get the profile full name
                 const profileId = userRecord['ProfileId'];
@@ -103,24 +107,29 @@
                 const permissionSetRecords = await this.$salesforceService.query(permissionSetQuery);
 
                 this.user.permissionSets = permissionSetRecords.map(record => record['PermissionSet']['Name']);
-
-                this.state = 'ready';
             },
-            onRunReportClick: async function() {
+            runReport: async function() {
                 this.state = 'processing';
-                this.progress = 0;
 
                 // Read profile and permission set metadata
-                const profileMetadata = await this.$salesforceService.readMetadata('Profile', [this.user.profile])[0];
-                this.progress = 33;
+                this.progress.value = 40;
+                this.progress.text = 'Reading profile...';
+                const profileMetadata = (await this.$salesforceService.readMetadata('Profile', [this.user.profile]))[0];
+                this.progress.text = 'Reading permission sets...';
+                this.progress.value = 60;
                 const permissionSetMetadatas = await this.$salesforceService.readMetadata('PermissionSet', this.user.permissionSets);
-                this.progress = 66;
 
                 // Merge metadata into one data structure
+                this.progress.text = 'Merging profile & permission sets...';
+                this.progress.value = 80;
                 this.summary = SalesforcePermissionsService.merge(profileMetadata, permissionSetMetadatas);
 
+                this.progress.text = 'Done!';
                 this.state = 'ready';
-                this.progress = 100;
+                this.progress.value = 100;
+            },
+            onRefreshClick: function() {
+                this.runReport();
             }
         }
     };

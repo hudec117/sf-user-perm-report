@@ -21,8 +21,8 @@ export default class SalesforcePermissionsService {
     static merge(profileMetadata, permissionSetMetadatas) {
         const merged = { };
 
-        // Merge profile metadata
-
+        // Throw the profile metadata in with permission sets.
+        permissionSetMetadatas.push(profileMetadata);
 
         // Merge each permission set metadata
         for (const permissionSetMetadata of permissionSetMetadatas) {

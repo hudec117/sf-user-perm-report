@@ -24,7 +24,7 @@ export default class SalesforceService {
     async readMetadata(type, names) {
         const message = this._constructReadMetadataMessage(type, names);
 
-        const requestUrl = new URL(METADATA_ENDPOINT, this.serverBaseUrl);;
+        const requestUrl = new URL(METADATA_ENDPOINT, this.serverBaseUrl);
         const response = await fetch(requestUrl, {
             method: 'POST',
             headers: {
@@ -40,7 +40,9 @@ export default class SalesforceService {
 
         const responseXml = new window.DOMParser().parseFromString(responseXmlRaw, 'text/xml');
 
-        return responseXml.querySelectorAll('Envelope Body result records');
+        const recordNodes = responseXml.querySelectorAll('Envelope Body readMetadataResponse result records');
+
+        return Array.from(recordNodes);
     }
 
     _constructReadMetadataMessage(type, names) {

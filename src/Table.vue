@@ -1,27 +1,50 @@
 <template>
     <div>
         <table class="table table-bordered table-sm">
-            <tbody v-for="(permissionType, permissionTypeName) of summary" v-bind:key="permissionTypeName">
+            <tbody v-for="(permissionType, permissionTypeName) of summary" :key="permissionTypeName">
                 <tr>
-                    <td>{{ permissionTypeName | metadataNodeNameToLabel }}</td>
-                </tr>
-                <tr v-for="(item, itemName) of permissionType" v-bind:key="itemName">
-                    <td>{{ itemName }}</td>
-                    <td v-for="(permission, permissionName) of item" v-bind:key="permissionName">
-                        <button type="button"
-                                class="btn btn-sm btn-link p-0"
-                                v-on:click="onPermissionClick(permission)">
-                            {{ permissionName | toSentenceCase }}
-                        </button>
+                    <td>
+                        <b-button variant="link"
+                                class="p-0"
+                                @click="onCollapseClick(permissionTypeName)">
+                            <b-icon-chevron-right v-if="collapseLookup[permissionTypeName]"></b-icon-chevron-right>
+                            <b-icon-chevron-down v-else></b-icon-chevron-down>
+                        </b-button>
+                        {{ permissionTypeName | metadataNodeNameToLabel }}
                     </td>
                 </tr>
+                <div v-if="!collapseLookup[permissionTypeName]">
+                    <tr v-for="(item, itemName) of permissionType" :key="itemName">
+                        <td>{{ itemName }}</td>
+                        <td v-for="(permission, permissionName) of item" :key="permissionName">
+                            <b-button variant="link" class="p-0" @click="onPermissionClick(permission)">
+                                {{ permissionName | toSentenceCase }}
+                            </b-button>
+                        </td>
+                    </tr>
+                </div>
             </tbody>
         </table>
         <b-modal id="permission-modal" title="Profiles &amp; Permission Sets" hide-footer>
             <table class="table table-bordered table-sm">
-                <tr v-for="(item, key) of viewingPermission">
-                    {{ key }} = {{ item }}
-                </tr>
+                <thead>
+                    <tr>
+                        <!-- <th>Label</th> -->
+                        <th>Full Name</th>
+                        <!-- <th>Type</th> -->
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(permissionValue, permissionSetName) of viewingPermission" :key="permissionSetName">
+                        <td>
+                            {{ permissionSetName }}
+                        </td>
+                        <td>
+                            {{ permissionValue }}
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </b-modal>
     </div>
@@ -35,7 +58,7 @@
         'tabVisibilities': 'Tab Visibilities',
         'tabSettings': 'Tab Visibilities',
         'userPermissions': 'System Permissions',
-        'classAccesses': 'Apex Classes Accesses',
+        'classAccesses': 'Apex Class Accesses',
         'customMetadataTypeAccesses': 'Custom Metadata Type Accesses',
         'customPermissions': 'Custom Permissions Accesses',
         'customSettingAccesses': 'Custom Setting Accesses',
@@ -51,30 +74,34 @@
         props: ['summary'],
         data: function() {
             return {
+                collapseLookup: { },
                 viewingPermission: { }
             };
         },
+        watch: {
+            summary: function(newSummary) {
+                this.collapseLookup = Object.keys(newSummary).reduce((lookup, key) => {
+                    lookup[key] = true;
+                    return lookup;
+                }, { });
+            }
+        },
         filters: {
             metadataNodeNameToLabel: function(value) {
-                if (!value) {
-                    return '';
-                }
-
                 return METADATA_NODE_TO_LABEL_LOOKUP[value];
             },
             toSentenceCase: function(value) {
-                if (!value) {
-                    return '';
-                }
-
                 const result = value.replace(/([A-Z])/g, ' $1');
                 return result.charAt(0).toUpperCase() + result.slice(1);
             }
         },
         methods: {
+            onCollapseClick: function(permissionTypeName) {
+                this.collapseLookup[permissionTypeName] = !this.collapseLookup[permissionTypeName]
+            },
             onPermissionClick: function(permission) {
                 this.viewingPermission = permission;
-                this.$bvModal.show('permission-modal');
+                // this.$bvModal.show('permission-modal');
             }
         }
     };
