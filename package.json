@@ -1,14 +1,14 @@
 {
-    "name": "vue-ext-test",
+    "name": "salesforce-user-permission-report",
     "version": "0.1.0",
-    "description": "",
+    "description": "Report summarising granted permissions to user from profile and permission sets. Easy way to identify if a user has specific permissions!",
     "main": "index.js",
     "scripts": {
         "build": "webpack --progress --config webpack.config.js",
         "dev": "webpack --watch --config webpack.config.js"
     },
-    "author": "",
-    "license": "ISC",
+    "author": "Aurel Hudec",
+    "license": "MIT",
     "devDependencies": {
         "babel-loader": "^8.2.2",
         "css-loader": "^5.0.1",
@@ -20,6 +20,7 @@
         "webpack-cli": "^4.5.0"
     },
     "dependencies": {
+        "bootstrap-vue": "^2.21.2",
         "bootswatch": "^4.6.0",
         "vue": "^2.6.12"
     }

@@ -1,30 +1,37 @@
 <template>
-    <div class="container-fluid mt-3">
-        <div class="row">
-            <div class="col-auto">
-                <button type="button"
-                        class="btn btn-lg btn-primary"
-                        v-on:click="onRunReportClick"
-                        v-bind:disabled="state !== 'ready'">Run Report for {{ user.name ? user.name : '...' }}</button>
-            </div>
-            <div class="col">
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" v-bind:style="progressBarStyle"></div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-
-        </div>
-    </div>
+    <b-container fluid>
+        <b-row class="mt-3">
+            <b-col sm="auto">
+                <b-button variant="primary"
+                          size="lg"
+                          v-bind:disabled="!canRunReport"
+                          @click="onRunReportClick">
+                    {{ runReportText }}
+                </b-button>
+            </b-col>
+            <b-col>
+                <b-progress height="46px" :value="progress"></b-progress>
+            </b-col>
+        </b-row>
+        <b-row class="mt-3">
+            <b-col>
+                <Table v-bind:summary="summary" />
+            </b-col>
+        </b-row>
+    </b-container>
 </template>
 
 <script>
     import Vue from 'vue';
+    import Table from './Table.vue';
 
     import SalesforceService from './services/SalesforceService.js';
+    import SalesforcePermissionsService from './services/SalesforcePermissionsService.js';
 
     export default {
+        components: {
+            Table
+        },
         data() {
             return {
                 state: 'loading',
@@ -36,12 +43,22 @@
                     profile: '',
                     permissionSets: []
                 },
-                sessionId: ''
+                sessionId: '',
+                summary: { }
             };
         },
         computed: {
-            progressBarStyle: function() {
-                return `width: ${this.progress}%;`;
+            canRunReport: function() {
+                return this.state === 'ready';
+            },
+            runReportText: function() {
+                if (this.state === 'loading') {
+                    return 'Run Report for ...';
+                } else if (this.state === 'ready') {
+                    return `Run Report for ${this.user.name}`;
+                } else if (this.state === 'processing') {
+                    return `Running Report for ${this.user.name}`;
+                }
             }
         },
         mounted: function() {
@@ -90,24 +107,21 @@
                 this.state = 'ready';
             },
             onRunReportClick: async function() {
+                this.state = 'processing';
                 this.progress = 0;
 
                 // Read profile and permission set metadata
-                const profileDocuments = await this.$salesforceService.readMetadata('Profile', [this.user.profile]);
+                const profileMetadata = await this.$salesforceService.readMetadata('Profile', [this.user.profile])[0];
                 this.progress = 33;
-                const permissionSetDocuments = await this.$salesforceService.readMetadata('PermissionSet', this.user.permissionSets);
+                const permissionSetMetadatas = await this.$salesforceService.readMetadata('PermissionSet', this.user.permissionSets);
                 this.progress = 66;
 
                 // Merge metadata into one data structure
+                this.summary = SalesforcePermissionsService.merge(profileMetadata, permissionSetMetadatas);
 
+                this.state = 'ready';
                 this.progress = 100;
             }
         }
     };
 </script>
-
-<style>
-.progress {
-    height: 46px;
-}
-</style>
