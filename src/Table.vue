@@ -1,24 +1,58 @@
 <template>
     <div>
+        <!-- Given the similarity in structure between Permission Sets and Profiles, both are referred to as "Permission Sets" in this file. -->
         <!-- "type" refers to permission type like Application Visibility, Page Accesses, Field Permission etc -->
         <!-- "item" refers to the actual metadata names like Account, Contact, standard-Case, WorkOrder.Number etc -->
+        <!-- "permission" refers to the permission name like AuthorApex, Enabled, Visible, Readable etc -->
 
-        <div class="card mb-2" v-for="(type, typeName) of summary" :key="typeName">
+        <div class="card mb-2" v-for="(type, typeName) of filteredSummary" :key="typeName">
             <div class="card-header border-bottom-0" @click="onTypeCollapseClick(typeName)">
                 <b-icon-chevron-right v-if="typeCollapse[typeName]"></b-icon-chevron-right>
                 <b-icon-chevron-down v-else></b-icon-chevron-down>
                 <span class="ml-1">{{ typeName | metadataNodeNameToLabel }}</span>
             </div>
             <div class="card-body p-0" v-if="!typeCollapse[typeName]">
-                <table class="table table-sm mb-0">
-                    <tr v-for="(item, itemName) of type" :key="itemName">
-                        <td>
-                            <b-icon-chevron-right v-if="itemCollapse[itemName]"></b-icon-chevron-right>
-                            <b-icon-chevron-down v-else></b-icon-chevron-down>
-                            <span class="ml-1">{{ itemName }}</span>
-                        </td>
-                    </tr>
-                </table>
+                <b-table :items="type"
+                         :fields="itemFields"
+                         :filter="filter"
+                         :filter-included-fields="filterIncludedFields"
+                         primary-key="item"
+                         @row-clicked="onRowClick"
+                         thead-class="hidden-header"
+                         tbody-tr-class="clickable-row"
+                         details-td-class="padded-row"
+                         table-class="mb-0"
+                         fixed
+                         small>
+                    <template #cell(show_details)="row">
+                        <b-icon-chevron-right v-if="!row.detailsShowing"></b-icon-chevron-right>
+                        <b-icon-chevron-down v-else></b-icon-chevron-down>
+                    </template>
+
+                    <template #row-details="row">
+                        <b-table-simple small bordered responsive class="mb-0">
+                            <b-thead>
+                                <b-tr>
+                                    <b-th>Profile/Permission Set</b-th>
+                                    <b-th v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">{{ permissionName | sentenceCase }}</b-th>
+                                </b-tr>
+                            </b-thead>
+                            <b-tbody>
+                                <b-tr v-for="permissionSetName of permissionSetNames" :key="permissionSetName">
+                                    <b-td>{{ permissionSetName }}</b-td>
+                                    <b-td v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">
+                                        {{
+                                            ((permissionSetName in row.item.permissionToPermissionSetLookup[permissionName]) ? 
+                                                row.item.permissionToPermissionSetLookup[permissionName][permissionSetName] :
+                                                'Unset'
+                                            ) | sentenceCase
+                                        }}
+                                    </b-td>
+                                </b-tr>
+                            </b-tbody>
+                        </b-table-simple>
+                    </template>
+                </b-table>
             </div>
         </div>
     </div>
@@ -46,31 +80,65 @@
     };
 
     export default {
-        props: ['summary'],
+        props: ['summary', 'filter'],
         data: function() {
             return {
                 typeCollapse: { },
-                itemCollapse: { }
+                filteredSummary: { },
+                permissionSetNames: [],
+                itemFields: [
+                    {
+                        key: 'show_details',
+                        tdClass: 'collapse-cell'
+                    },
+                    {
+                        key: 'item'
+                    }
+                ],
+                filterIncludedFields: ['item']
             };
         },
         watch: {
             summary: function(newSummary) {
-                const types = Object.keys(newSummary);
-                for (const type of types) {
-                    Vue.set(this.typeCollapse, type, true);
+                for (const typeName of Object.keys(newSummary)) {
+                    Vue.set(this.typeCollapse, typeName, true);
+                    Vue.set(this.filteredSummary, typeName, []);
 
-                    const items = Object.keys(newSummary[type]);
-                    for (const item of items) {
-                        Vue.set(this.itemCollapse, type + item, true);
+                    const type = newSummary[typeName];
+                    for (const itemName of Object.keys(type)) {
+                        const item = newSummary[typeName][itemName];
+
+                        // Create new row for the item and push it to the array.
+                        // (This allows it to be displayed using a Bootstrap-Vue table)
+                        const row = {
+                            item: itemName,
+                            permissionToPermissionSetLookup: item,
+                            _showDetails: false
+                        };
+
+                        this.filteredSummary[typeName].push(row);
+
+                        // Dig down to permission sets and get unique names
+                        for (const permission of Object.values(item)) {
+                            for (const permissionSetName of Object.keys(permission)) {
+                                if (!this.permissionSetNames.includes(permissionSetName)) {
+                                    this.permissionSetNames.push(permissionSetName);
+                                }
+                            }
+                        }
                     }
                 }
             }
         },
         filters: {
             metadataNodeNameToLabel: function(value) {
+                if (!value) return '';
+
                 return METADATA_NODE_TO_LABEL_LOOKUP[value];
             },
-            toSentenceCase: function(value) {
+            sentenceCase: function(value) {
+                if (!value) return '';
+
                 const result = value.replace(/([A-Z])/g, ' $1');
                 return result.charAt(0).toUpperCase() + result.slice(1);
             }
@@ -78,6 +146,9 @@
         methods: {
             onTypeCollapseClick: function(typeName) {
                 this.typeCollapse[typeName] = !this.typeCollapse[typeName]
+            },
+            onRowClick: function(item) {
+                item._showDetails = !item._showDetails;
             }
         }
     };
@@ -88,8 +159,27 @@
     cursor: pointer;
     padding: .5rem .75rem !important;
 }
+</style>
 
-.table td {
+<style>
+.hidden-header {
+    display: none;
+}
+
+.clickable-row:not(.b-table-details) {
+    cursor: pointer;
+}
+
+.b-table-details > td {
+    padding-left: 4rem !important;
+}
+
+.padded-row {
+    padding-left: 2rem !important;
+}
+
+.collapse-cell {
+    width: 50px;
     padding-left: 2rem !important;
 }
 </style>
