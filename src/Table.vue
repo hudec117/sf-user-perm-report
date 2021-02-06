@@ -1,61 +1,36 @@
 <template>
     <div>
-        <table class="table table-bordered table-sm">
-            <tbody v-for="(permissionType, permissionTypeName) of summary" :key="permissionTypeName">
-                <tr>
-                    <td>
-                        <b-button variant="link"
-                                class="p-0"
-                                @click="onCollapseClick(permissionTypeName)">
-                            <b-icon-chevron-right v-if="collapseLookup[permissionTypeName]"></b-icon-chevron-right>
+        <!-- "type" refers to permission type like Application Visibility, Page Accesses, Field Permission etc -->
+        <!-- "item" refers to the actual metadata names like Account, Contact, standard-Case, WorkOrder.Number etc -->
+
+        <div class="card mb-2" v-for="(type, typeName) of summary" :key="typeName">
+            <div class="card-header border-bottom-0" @click="onTypeCollapseClick(typeName)">
+                <b-icon-chevron-right v-if="typeCollapse[typeName]"></b-icon-chevron-right>
+                <b-icon-chevron-down v-else></b-icon-chevron-down>
+                <span class="ml-1">{{ typeName | metadataNodeNameToLabel }}</span>
+            </div>
+            <div class="card-body p-0" v-if="!typeCollapse[typeName]">
+                <table class="table table-sm mb-0">
+                    <tr v-for="(item, itemName) of type" :key="itemName">
+                        <td>
+                            <b-icon-chevron-right v-if="itemCollapse[itemName]"></b-icon-chevron-right>
                             <b-icon-chevron-down v-else></b-icon-chevron-down>
-                        </b-button>
-                        {{ permissionTypeName | metadataNodeNameToLabel }}
-                    </td>
-                </tr>
-                <div v-if="!collapseLookup[permissionTypeName]">
-                    <tr v-for="(item, itemName) of permissionType" :key="itemName">
-                        <td>{{ itemName }}</td>
-                        <td v-for="(permission, permissionName) of item" :key="permissionName">
-                            <b-button variant="link" class="p-0" @click="onPermissionClick(permission)">
-                                {{ permissionName | toSentenceCase }}
-                            </b-button>
+                            <span class="ml-1">{{ itemName }}</span>
                         </td>
                     </tr>
-                </div>
-            </tbody>
-        </table>
-        <b-modal id="permission-modal" title="Profiles &amp; Permission Sets" hide-footer>
-            <table class="table table-bordered table-sm">
-                <thead>
-                    <tr>
-                        <!-- <th>Label</th> -->
-                        <th>Full Name</th>
-                        <!-- <th>Type</th> -->
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(permissionValue, permissionSetName) of viewingPermission" :key="permissionSetName">
-                        <td>
-                            {{ permissionSetName }}
-                        </td>
-                        <td>
-                            {{ permissionValue }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </b-modal>
+                </table>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
+    import Vue from 'vue';
+
     const METADATA_NODE_TO_LABEL_LOOKUP = {
         'applicationVisibilities': 'Assigned Apps',
         'fieldPermissions': 'Field Permissions',
         'objectPermissions': 'Object Permissions',
-        'tabVisibilities': 'Tab Visibilities',
         'tabSettings': 'Tab Visibilities',
         'userPermissions': 'System Permissions',
         'classAccesses': 'Apex Class Accesses',
@@ -74,16 +49,21 @@
         props: ['summary'],
         data: function() {
             return {
-                collapseLookup: { },
-                viewingPermission: { }
+                typeCollapse: { },
+                itemCollapse: { }
             };
         },
         watch: {
             summary: function(newSummary) {
-                this.collapseLookup = Object.keys(newSummary).reduce((lookup, key) => {
-                    lookup[key] = true;
-                    return lookup;
-                }, { });
+                const types = Object.keys(newSummary);
+                for (const type of types) {
+                    Vue.set(this.typeCollapse, type, true);
+
+                    const items = Object.keys(newSummary[type]);
+                    for (const item of items) {
+                        Vue.set(this.itemCollapse, type + item, true);
+                    }
+                }
             }
         },
         filters: {
@@ -96,13 +76,20 @@
             }
         },
         methods: {
-            onCollapseClick: function(permissionTypeName) {
-                this.collapseLookup[permissionTypeName] = !this.collapseLookup[permissionTypeName]
-            },
-            onPermissionClick: function(permission) {
-                this.viewingPermission = permission;
-                // this.$bvModal.show('permission-modal');
+            onTypeCollapseClick: function(typeName) {
+                this.typeCollapse[typeName] = !this.typeCollapse[typeName]
             }
         }
     };
 </script>
+
+<style scoped>
+.card-header {
+    cursor: pointer;
+    padding: .5rem .75rem !important;
+}
+
+.table td {
+    padding-left: 2rem !important;
+}
+</style>

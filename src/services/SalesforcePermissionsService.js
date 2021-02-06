@@ -2,7 +2,6 @@ const PERMISSION_NODE_IDENTIFIERS = {
     'applicationVisibilities': 'application',
     'fieldPermissions': 'field',
     'objectPermissions': 'object',
-    'tabVisibilities': 'tab',
     'tabSettings': 'tab',
     'userPermissions': 'name',
     'classAccesses': 'apexClass',
@@ -20,6 +19,19 @@ const PERMISSION_NODE_IDENTIFIERS = {
 export default class SalesforcePermissionsService {
     static merge(profileMetadata, permissionSetMetadatas) {
         const merged = { };
+
+        // Rename "tabVisibilities" nodes to "tabSettings" so it can be merged with permission sets.
+        const tabVisibilityNodes = profileMetadata.querySelectorAll('tabVisibilities');
+        for (const tabVisibilityNode of tabVisibilityNodes) {
+            const tabSettingNode = document.createElementNS(null, 'tabSettings');
+
+            while (tabVisibilityNode.childNodes.length > 0) {
+                tabSettingNode.appendChild(tabVisibilityNode.childNodes[0]);
+            }
+
+            profileMetadata.removeChild(tabVisibilityNode);
+            profileMetadata.appendChild(tabSettingNode);
+        }
 
         // Throw the profile metadata in with permission sets.
         permissionSetMetadatas.push(profileMetadata);

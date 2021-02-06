@@ -6,9 +6,9 @@
                     <b-icon-arrow-clockwise class="mr-2"></b-icon-arrow-clockwise> {{ user.name }}
                 </b-button>
             </b-col>
-            <b-col sm="3" class="pr-0">
+            <!-- <b-col sm="3" class="pr-0">
                 <b-input type="text" size="lg" :disabled="!canRefreshReport" placeholder="Filter..."></b-input>
-            </b-col>
+            </b-col> -->
             <b-col>
                 <b-progress height="46px">
                     <b-progress-bar :value="progress.value">
