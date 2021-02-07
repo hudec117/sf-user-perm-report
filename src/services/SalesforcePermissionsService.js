@@ -1,4 +1,4 @@
-const PERMISSION_NODE_IDENTIFIERS = {
+const PERMISSION_TYPE_NODE_IDENTIFIERS = {
     'applicationVisibilities': 'application',
     'fieldPermissions': 'field',
     'objectPermissions': 'object',
@@ -17,36 +17,42 @@ const PERMISSION_NODE_IDENTIFIERS = {
 };
 
 export default class SalesforcePermissionsService {
-    static merge(profileMetadata, permissionSetMetadatas) {
+    static merge(profileMetadatas, permissionSetMetadatas) {
         const merged = { };
 
-        // Rename "tabVisibilities" nodes to "tabSettings" so it can be merged with permission sets.
-        const tabVisibilityNodes = profileMetadata.querySelectorAll('tabVisibilities');
-        for (const tabVisibilityNode of tabVisibilityNodes) {
-            const tabSettingNode = document.createElementNS(null, 'tabSettings');
+        const allMetadatas = profileMetadatas.concat(permissionSetMetadatas);
 
-            while (tabVisibilityNode.childNodes.length > 0) {
-                tabSettingNode.appendChild(tabVisibilityNode.childNodes[0]);
+        // Rename the profile's "tabVisibilities" nodes to "tabSettings" so it can be merged with permission sets.
+        for (const profileMetadata of profileMetadatas) {
+            const tabVisibilityNodes = profileMetadata.querySelectorAll('tabVisibilities');
+            for (const tabVisibilityNode of tabVisibilityNodes) {
+                const tabSettingNode = document.createElementNS(null, 'tabSettings');
+
+                while (tabVisibilityNode.childNodes.length > 0) {
+                    tabSettingNode.appendChild(tabVisibilityNode.childNodes[0]);
+                }
+
+                profileMetadata.removeChild(tabVisibilityNode);
+                profileMetadata.appendChild(tabSettingNode);
             }
-
-            profileMetadata.removeChild(tabVisibilityNode);
-            profileMetadata.appendChild(tabSettingNode);
         }
 
-        // Throw the profile metadata in with permission sets.
-        permissionSetMetadatas.push(profileMetadata);
+        // Merge each profile/permission set metadata
+        for (const metadata of allMetadatas) {
+            // Get profile/permission set name and label
+            const metadataName = metadata.getElementsByTagName('fullName')[0].textContent;
+            let metadataLabel = metadataName;
 
-        // Merge each permission set metadata
-        for (const permissionSetMetadata of permissionSetMetadatas) {
-            // Get permission set name
-            const permissionSetName = permissionSetMetadata.getElementsByTagName('fullName')[0].textContent;
+            const labelElements = metadata.getElementsByTagName('label');
+            if (labelElements.length > 0) {
+                metadataLabel = labelElements[0].textContent;
+            }
 
-            const permissionNodes = permissionSetMetadata.childNodes;
-            for (const permissionNode of permissionNodes) {
-                const permissionTypeName = permissionNode.tagName;
+            const permissionTypeNodes = metadata.childNodes;
+            for (const permissionTypeNode of permissionTypeNodes) {
+                const permissionTypeName = permissionTypeNode.tagName;
 
-                if (!(permissionTypeName in PERMISSION_NODE_IDENTIFIERS)) {
-                    console.log(`Permission type ${permissionTypeName} not supported.`);
+                if (!(permissionTypeName in PERMISSION_TYPE_NODE_IDENTIFIERS)) {
                     continue;
                 }
 
@@ -55,24 +61,24 @@ export default class SalesforcePermissionsService {
                 }
 
                 // Find permission node unique identifier
-                const identifierNodeName = PERMISSION_NODE_IDENTIFIERS[permissionTypeName];
-                const identifier = permissionNode.getElementsByTagName(identifierNodeName)[0].textContent;
+                const identifierNodeName = PERMISSION_TYPE_NODE_IDENTIFIERS[permissionTypeName];
+                const itemName = permissionTypeNode.getElementsByTagName(identifierNodeName)[0].textContent;
 
-                if (!(identifier in merged[permissionTypeName])) {
-                    merged[permissionTypeName][identifier] = { };
+                if (!(itemName in merged[permissionTypeName])) {
+                    merged[permissionTypeName][itemName] = { };
                 }
 
-                // Add each permission-detail
-                const detailPermissions = permissionNode.querySelectorAll(`*:not(${identifierNodeName})`);
-                for (const detailPermission of detailPermissions) {
-                    const detailPermissionName = detailPermission.tagName;
-                    const detailPermissionValue = detailPermission.textContent;
+                // Add each permission
+                const permissionNodes = permissionTypeNode.querySelectorAll(`*:not(${identifierNodeName})`);
+                for (const permissionNode of permissionNodes) {
+                    const permissionName = permissionNode.tagName;
+                    const permissionValue = permissionNode.textContent;
 
-                    if (!(detailPermissionName in merged[permissionTypeName][identifier])) {
-                        merged[permissionTypeName][identifier][detailPermissionName] = { };
+                    if (!(permissionName in merged[permissionTypeName][itemName])) {
+                        merged[permissionTypeName][itemName][permissionName] = { };
                     }
 
-                    merged[permissionTypeName][identifier][detailPermissionName][permissionSetName] = detailPermissionValue;
+                    merged[permissionTypeName][itemName][permissionName][metadataName] = permissionValue;
                 }
             }
         }

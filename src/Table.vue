@@ -4,6 +4,7 @@
         <!-- "type" refers to permission type like Application Visibility, Page Accesses, Field Permission etc -->
         <!-- "item" refers to the actual metadata names like Account, Contact, standard-Case, WorkOrder.Number etc -->
         <!-- "permission" refers to the permission name like AuthorApex, Enabled, Visible, Readable etc -->
+        <!-- "permission value" or "value" refers to the value set for the permission such as DefaultOn, True, False etc -->
 
         <div class="card mb-2" v-for="(type, typeName) of filteredSummary" :key="typeName">
             <div class="card-header border-bottom-0" @click="onTypeCollapseClick(typeName)">
@@ -14,8 +15,6 @@
             <div class="card-body p-0" v-if="!typeCollapse[typeName]">
                 <b-table :items="type"
                          :fields="itemFields"
-                         :filter="filter"
-                         :filter-included-fields="filterIncludedFields"
                          primary-key="item"
                          @row-clicked="onRowClick"
                          thead-class="hidden-header"
@@ -30,23 +29,23 @@
                     </template>
 
                     <template #row-details="row">
-                        <b-table-simple small bordered responsive class="mb-0">
+                        <b-table-simple small bordered hover responsive class="mb-0">
                             <b-thead>
                                 <b-tr>
                                     <b-th>Profile/Permission Set</b-th>
-                                    <b-th v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">{{ permissionName | sentenceCase }}</b-th>
+                                    <b-th v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">
+                                        {{ permissionName | sentenceCase }}
+                                    </b-th>
                                 </b-tr>
                             </b-thead>
                             <b-tbody>
                                 <b-tr v-for="permissionSetName of permissionSetNames" :key="permissionSetName">
                                     <b-td>{{ permissionSetName }}</b-td>
                                     <b-td v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">
-                                        {{
-                                            ((permissionSetName in row.item.permissionToPermissionSetLookup[permissionName]) ? 
-                                                row.item.permissionToPermissionSetLookup[permissionName][permissionSetName] :
-                                                'Unset'
-                                            ) | sentenceCase
-                                        }}
+                                        <span v-if="permissionSetName in row.item.permissionToPermissionSetLookup[permissionName]">
+                                            {{ row.item.permissionToPermissionSetLookup[permissionName][permissionSetName] | sentenceCase }}
+                                        </span>
+                                        <span class="text-muted" v-else>Unset</span>
                                     </b-td>
                                 </b-tr>
                             </b-tbody>
@@ -84,7 +83,6 @@
         data: function() {
             return {
                 typeCollapse: { },
-                filteredSummary: { },
                 permissionSetNames: [],
                 itemFields: [
                     {
@@ -94,29 +92,44 @@
                     {
                         key: 'item'
                     }
-                ],
-                filterIncludedFields: ['item']
+                ]
             };
         },
-        watch: {
-            summary: function(newSummary) {
-                for (const typeName of Object.keys(newSummary)) {
+        computed: {
+            filteredSummary: function() {
+                const filteredSummary = { };
+
+                // Reset data since we're in a computed property
+                this.typeCollapse = { };
+                this.permissionSetNames = [];
+
+                for (const typeName of Object.keys(this.summary)) {
                     Vue.set(this.typeCollapse, typeName, true);
-                    Vue.set(this.filteredSummary, typeName, []);
 
-                    const type = newSummary[typeName];
+                    const type = this.summary[typeName];
                     for (const itemName of Object.keys(type)) {
-                        const item = newSummary[typeName][itemName];
+                        const item = this.summary[typeName][itemName];
 
-                        // Create new row for the item and push it to the array.
-                        // (This allows it to be displayed using a Bootstrap-Vue table)
-                        const row = {
-                            item: itemName,
-                            permissionToPermissionSetLookup: item,
-                            _showDetails: false
-                        };
+                        const shouldAddRow = !this.filter || (this.filter && itemName.toLowerCase().includes(this.filter.toLowerCase()));
+                        if (shouldAddRow) {
+                            // Create new row for the item and push it to the array.
+                            // (This allows it to be displayed using a Bootstrap-Vue table)
+                            const row = {
+                                item: itemName,
+                                permissionToPermissionSetLookup: item,
+                                _showDetails: false
+                            };
 
-                        this.filteredSummary[typeName].push(row);
+                            if (!(typeName in filteredSummary)) {
+                                Vue.set(filteredSummary, typeName, []);
+                            }
+
+                            filteredSummary[typeName].push(row);
+
+                            if (this.filter) {
+                                this.typeCollapse[typeName] = false;
+                            }
+                        }
 
                         // Dig down to permission sets and get unique names
                         for (const permission of Object.values(item)) {
@@ -128,6 +141,8 @@
                         }
                     }
                 }
+
+                return filteredSummary;
             }
         },
         filters: {

@@ -7,7 +7,20 @@
                 </b-button>
             </b-col>
             <b-col sm="3" class="pr-0">
-                <b-input type="text" size="lg" :disabled="!canRefreshReport" placeholder="Filter..." v-model="filter"></b-input>
+                <b-input-group>
+                    <b-input type="text"
+                             size="lg"
+                             v-bind:value="filter"
+                             :disabled="!canRefreshReport"
+                             placeholder="Filter..."
+                             v-debounce="onFilterUpdate">
+                    </b-input>
+                    <b-input-group-append>
+                        <b-button variant="secondary" :disabled="!canRefreshReport" @click="filter = ''">
+                            <b-icon-x-circle></b-icon-x-circle>
+                        </b-button>
+                    </b-input-group-append>
+                </b-input-group>
             </b-col>
             <b-col>
                 <b-progress height="46px">
@@ -115,7 +128,7 @@
                 // Read profile and permission set metadata
                 this.progress.value = 40;
                 this.progress.text = 'Reading profile...';
-                const profileMetadata = (await this.$salesforceService.readMetadata('Profile', [this.user.profile]))[0];
+                const profileMetadatas = await this.$salesforceService.readMetadata('Profile', [this.user.profile]);
                 this.progress.text = 'Reading permission sets...';
                 this.progress.value = 60;
                 const permissionSetMetadatas = await this.$salesforceService.readMetadata('PermissionSet', this.user.permissionSets);
@@ -123,7 +136,7 @@
                 // Merge metadata into one data structure
                 this.progress.text = 'Merging profile & permission sets...';
                 this.progress.value = 80;
-                this.summary = SalesforcePermissionsService.merge(profileMetadata, permissionSetMetadatas);
+                this.summary = SalesforcePermissionsService.merge(profileMetadatas, permissionSetMetadatas);
 
                 this.progress.text = 'Done!';
                 this.state = 'ready';
@@ -131,6 +144,9 @@
             },
             onRefreshClick: function() {
                 this.runReport();
+            },
+            onFilterUpdate: function(newFilter) {
+                this.filter = newFilter;
             }
         }
     };

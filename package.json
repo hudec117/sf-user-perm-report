@@ -1,11 +1,11 @@
 {
     "name": "salesforce-user-permission-report",
     "version": "0.1.0",
-    "description": "Report summarising granted permissions to user from profile and permission sets. Easy way to identify if a user has specific permissions!",
+    "description": "Report showing granted permissions to a user from profile and permission sets. Accessible from user detail page.",
     "main": "index.js",
     "scripts": {
-        "build": "webpack --progress --config webpack.config.js",
-        "dev": "webpack --watch --config webpack.config.js"
+        "dev": "webpack --watch --config webpack.dev.js",
+        "build": "webpack --config webpack.prod.js"
     },
     "author": "Aurel Hudec",
     "license": "MIT",
@@ -17,11 +17,13 @@
         "vue-style-loader": "^4.1.2",
         "vue-template-compiler": "^2.6.12",
         "webpack": "^5.20.1",
-        "webpack-cli": "^4.5.0"
+        "webpack-cli": "^4.5.0",
+        "webpack-merge": "^5.7.3"
     },
     "dependencies": {
         "bootstrap-vue": "^2.21.2",
         "bootswatch": "^4.6.0",
-        "vue": "^2.6.12"
+        "vue": "^2.6.12",
+        "vue-debounce": "^2.6.0"
     }
 }

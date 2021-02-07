@@ -1,13 +1,14 @@
 {
     "name": "Salesforce User Permission Report",
-    "description": "Report summarising granted permissions to user from profile and permission sets. Easy way to identify if a user has specific permissions!",
+    "description": "Report showing granted permissions to a user from profile and permission sets. Accessible from user detail page.",
     "version": "0.1.0",
     "author": "Aurel Hudec",
+    "homepage_url": "https://github.com/hudec117/sf-user-perm-report",
+    "incognito": "split",
+    "minimum_chrome_version": "88",
     "manifest_version": 3,
     "permissions": [
-        "cookies",
-        "storage",
-        "tabs"
+        "cookies"
     ],
     "host_permissions": [
         "https://*.my.salesforce.com/"
@@ -20,13 +21,9 @@
     },
     "content_scripts": [
         {
-            "matches": [
-                "https://*.my.salesforce.com/*"
-            ],
+            "matches": [ "https://*.my.salesforce.com/*" ],
             "all_frames": true,
-            "js": [
-                "content-script.js"
-            ]
+            "js": [ "content-script.js" ]
         }
     ]
 }
