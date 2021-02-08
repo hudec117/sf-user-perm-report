@@ -95,13 +95,15 @@
                     Vue.prototype.$salesforceService = new SalesforceService(self.serverHost, self.sessionId);
 
                     // Get information on user
-                    await self.initialiseUserInfo();
+                    await self.loadUserInfo();
 
                     // Run the report
                     await self.runReport();
                 });
             },
-            initialiseUserInfo: async function() {
+            loadUserInfo: async function() {
+                this.state = 'loading';
+
                 this.progress.value = 20;
                 this.progress.text = 'Getting user info...';
 
@@ -142,11 +144,15 @@
                 this.summary = SalesforcePermissionsService.merge(profileMetadatas, permissionSetMetadatas);
 
                 this.progress.text = 'Done!';
-                this.state = 'ready';
                 this.progress.value = 100;
+                this.state = 'ready';
             },
-            onRefreshClick: function() {
-                this.runReport();
+            onRefreshClick: async function() {
+                this.summary = { };
+
+                await this.loadUserInfo();
+
+                await this.runReport();
             },
             onFilterUpdate: function(newFilter) {
                 if (newFilter.trim() !== '') {

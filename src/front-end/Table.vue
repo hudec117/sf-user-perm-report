@@ -40,7 +40,7 @@
                             </b-thead>
                             <b-tbody>
                                 <b-tr v-for="permissionSetName of permissionSetNames" :key="permissionSetName">
-                                    <b-td>{{ permissionSetName }}</b-td>
+                                    <b-td class="fit-column">{{ permissionSetName }}</b-td>
                                     <b-td v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">
                                         <span v-if="permissionSetName in row.item.permissionToPermissionSetLookup[permissionName]">
                                             {{ row.item.permissionToPermissionSetLookup[permissionName][permissionSetName] | sentenceCase }}
@@ -196,5 +196,10 @@
 .collapse-cell {
     width: 50px;
     padding-left: 2rem !important;
+}
+
+.fit-column  {
+    width: 1%;
+    min-width: 165px;
 }
 </style>
