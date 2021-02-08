@@ -1,4 +1,4 @@
-import App from './src/App.vue';
+import App from './App.vue';
 import Vue from 'vue';
 import VueDebounce from 'vue-debounce';
 

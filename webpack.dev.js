@@ -1,7 +1,13 @@
+const path = require('path');
+
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
 
 module.exports = merge(common, {
     mode: 'development',
-    devtool: 'cheap-module-source-map'
+    devtool: 'cheap-module-source-map',
+    output: {
+        path: path.resolve(__dirname, 'src'),
+        filename: 'build.js'
+    }
 });

@@ -2,7 +2,6 @@
     "name": "salesforce-user-permission-report",
     "version": "0.1.0",
     "description": "Report showing granted permissions to a user from profile and permission sets. Accessible from user detail page.",
-    "main": "index.js",
     "scripts": {
         "dev": "webpack --watch --config webpack.dev.js",
         "build": "webpack --config webpack.prod.js"
