@@ -16,7 +16,7 @@
                              v-debounce="onFilterUpdate">
                     </b-input>
                     <b-input-group-append>
-                        <b-button variant="secondary" :disabled="!canRefreshReport" @click="filter = ''">
+                        <b-button variant="secondary" :disabled="!canClearFilter" @click="filter = ''">
                             <b-icon-x-circle></b-icon-x-circle>
                         </b-button>
                     </b-input-group-append>
@@ -71,6 +71,9 @@
         computed: {
             canRefreshReport: function() {
                 return this.state === 'ready';
+            },
+            canClearFilter: function() {
+                return this.canRefreshReport && this.filter;
             }
         },
         mounted: function() {
@@ -146,7 +149,11 @@
                 this.runReport();
             },
             onFilterUpdate: function(newFilter) {
-                this.filter = newFilter;
+                if (newFilter.trim() !== '') {
+                    this.filter = newFilter;
+                } else {
+                    this.filter = '';
+                }
             }
         }
     };
