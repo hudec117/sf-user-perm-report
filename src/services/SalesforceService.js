@@ -22,27 +22,43 @@ export default class SalesforceService {
     }
 
     async readMetadata(type, names) {
-        const message = this._constructReadMetadataMessage(type, names);
+        let allRecordNodes = [];
 
-        const requestUrl = new URL(METADATA_ENDPOINT, this.serverBaseUrl);
-        const response = await fetch(requestUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/xml',
-                'SOAPAction': '""'
-            },
-            body: message
-        });
+        // The Metadata API readMetadata() call only supports reading 10 pieces
+        // of metadata at a time so we need to chunk it.
+        const batchSize = 10;
+        const nameBatches = [];
 
-        // TODO: error handling
+        for (let i = 0; i < names.length; i += batchSize) {
+            const newNameBatch = names.slice(i, i + batchSize);
+            nameBatches.push(newNameBatch);
+        }
 
-        const responseXmlRaw = await response.text();
+        for (const nameBatch of nameBatches) {
+            const message = this._constructReadMetadataMessage(type, nameBatch);
 
-        const responseXml = new window.DOMParser().parseFromString(responseXmlRaw, 'text/xml');
+            const requestUrl = new URL(METADATA_ENDPOINT, this.serverBaseUrl);
+            const response = await fetch(requestUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/xml',
+                    'SOAPAction': '""'
+                },
+                body: message
+            });
 
-        const recordNodes = responseXml.querySelectorAll('Envelope Body readMetadataResponse result records');
+            // TODO: error handling
 
-        return Array.from(recordNodes);
+            const responseXmlRaw = await response.text();
+
+            const responseXml = new window.DOMParser().parseFromString(responseXmlRaw, 'text/xml');
+
+            const recordNodes = responseXml.querySelectorAll('Envelope Body readMetadataResponse result records');
+
+            allRecordNodes = allRecordNodes.concat(Array.from(recordNodes));
+        }
+
+        return allRecordNodes;
     }
 
     _constructReadMetadataMessage(type, names) {
