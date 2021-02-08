@@ -1,10 +1,10 @@
 (function() {
-    // Note: for whatever reason this code executes multiple times on page load and sometimes
-    // topButtonRow is null.
+    // Note: for whatever reason this code executes multiple times on page load and first time we cannot access the DOM.
 
-    // Add the "Run Permission Report" button when the button row is available.
-    const topButtonRow = document.getElementById('topButtonRow');
-    if (topButtonRow !== null) {
+    const pageTypeElements = document.getElementsByClassName('pageType');
+
+    const canAddButton = pageTypeElements.length > 0 && pageTypeElements[0].innerText === 'User';
+    if (canAddButton) {
         const permissionReportButton = document.createElement('input');
         permissionReportButton.value = 'Open Permission Report';
         permissionReportButton.className = 'btn';
@@ -14,6 +14,7 @@
             chrome.runtime.sendMessage({ operation: 'open-report' });
         });
 
+        const topButtonRow = document.getElementById('topButtonRow');
         topButtonRow.appendChild(permissionReportButton);
     }
 })();
