@@ -1,5 +1,10 @@
 <template>
     <b-container fluid>
+        <b-row>
+            <b-col>
+                <b-alert variant="warning" v-bind:show="alert !== ''" class="mb-0 mt-3">{{ alert }}</b-alert>
+            </b-col>
+        </b-row>
         <b-row class="mt-3">
             <b-col sm="auto" class="pr-0">
                 <b-button variant="primary" size="lg" :disabled="!canRefreshReport" @click="onRefreshClick" title="Refresh">
@@ -52,6 +57,7 @@
         data() {
             return {
                 state: 'loading',
+                alert: '',
                 progress: {
                     value: 0,
                     text: ''
@@ -106,7 +112,7 @@
                 const userQuery = `SELECT Username, ProfileId FROM User WHERE Id = '${this.user.id}'`;
                 const userQueryResult = await this.$salesforceService.query(userQuery);
                 if (!userQueryResult.success) {
-                    console.error(userQueryResult.error);
+                    this.alert = userQueryResult.error;
                     return;
                 }
 
@@ -118,7 +124,7 @@
                 const profileQuery = `SELECT FullName FROM Profile WHERE Id = '${profileId}'`;
                 const profileQueryResult = await this.$salesforceService.query(profileQuery, true);
                 if (!profileQueryResult.success) {
-                    console.error(profileQueryResult.error);
+                    this.alert = profileQueryResult.error;
                     return;
                 }
 
@@ -128,7 +134,7 @@
                 const permissionSetQuery = `SELECT PermissionSet.Name FROM PermissionSetAssignment WHERE AssigneeId = '${this.user.id}' AND PermissionSet.IsCustom = true`;
                 const permissionSetQueryResult = await this.$salesforceService.query(permissionSetQuery);
                 if (!permissionSetQueryResult.success) {
-                    console.error(permissionSetQueryResult.error);
+                    this.alert = permissionSetQueryResult.error;
                     return;
                 }
 
@@ -141,7 +147,7 @@
                 this.progress.text = 'Reading profile...';
                 const profileReadResult = await this.$salesforceService.readMetadata('Profile', [profileName]);
                 if (!profileReadResult.success) {
-                    console.error(profileReadResult.error);
+                    this.alert = profileReadResult.error;
                     return;
                 }
 
@@ -149,7 +155,7 @@
                 this.progress.value = 60;
                 const permissionSetsReadResult = await this.$salesforceService.readMetadata('PermissionSet', permissionSetNames);
                 if (!permissionSetsReadResult.success) {
-                    console.error(profileReadResult.error);
+                    this.alert = permissionSetsReadResult.error;
                     return;
                 }
 
