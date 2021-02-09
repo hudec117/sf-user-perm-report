@@ -9,7 +9,7 @@ Salesforce User Permission Report is here to help. This tool reads all of the us
 
 #### Features
  - Filtering
- - Intuitive Tree View
+ - Intuitive tree view
  - Consolidated view of user permissions
 
 ## Download
@@ -19,6 +19,11 @@ This extension is available on the [Chrome Web Store](https://chrome.google.com/
 ## Usage
 
 Navigate to any user detail record in Classic or Lightning and click the "Open Permission Report" button next to the "Change Password" button.
+
+## Screenshots
+
+<img src="branding/user-detail-screenshot.jpg" width="400">
+<img src="branding/filter-screenshot.png" width="400">
 
 ## Support
 
