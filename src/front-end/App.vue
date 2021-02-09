@@ -59,9 +59,7 @@
                 serverHost: '',
                 user: {
                     id: '',
-                    name: '',
-                    profile: '',
-                    permissionSets: []
+                    name: ''
                 },
                 sessionId: '',
                 filter: '',
@@ -94,14 +92,11 @@
                     // Initialise Salesforce service
                     Vue.prototype.$salesforceService = new SalesforceService(self.serverHost, self.sessionId);
 
-                    // Get information on user
-                    await self.loadUserInfo();
-
                     // Run the report
                     await self.runReport();
                 });
             },
-            loadUserInfo: async function() {
+            runReport: async function() {
                 this.state = 'loading';
 
                 this.progress.value = 20;
@@ -109,39 +104,59 @@
 
                 // Get the users name and profile ID
                 const userQuery = `SELECT Username, ProfileId FROM User WHERE Id = '${this.user.id}'`;
-                const userRecords = await this.$salesforceService.query(userQuery);
-                const userRecord = userRecords[0];
+                const userQueryResult = await this.$salesforceService.query(userQuery);
+                if (!userQueryResult.success) {
+                    console.error(userQueryResult.error);
+                    return;
+                }
 
+                const userRecord = userQueryResult.records[0];
                 this.user.name = userRecord['Username'];
 
                 // Get the profile full name
                 const profileId = userRecord['ProfileId'];
                 const profileQuery = `SELECT FullName FROM Profile WHERE Id = '${profileId}'`;
-                const profileRecords = await this.$salesforceService.query(profileQuery, true);
+                const profileQueryResult = await this.$salesforceService.query(profileQuery, true);
+                if (!profileQueryResult.success) {
+                    console.error(profileQueryResult.error);
+                    return;
+                }
 
-                this.user.profile = profileRecords[0]['FullName'];
+                const profileName = profileQueryResult.records[0]['FullName'];
 
                 // Get user permission sets
                 const permissionSetQuery = `SELECT PermissionSet.Name FROM PermissionSetAssignment WHERE AssigneeId = '${this.user.id}' AND PermissionSet.IsCustom = true`;
-                const permissionSetRecords = await this.$salesforceService.query(permissionSetQuery);
+                const permissionSetQueryResult = await this.$salesforceService.query(permissionSetQuery);
+                if (!permissionSetQueryResult.success) {
+                    console.error(permissionSetQueryResult.error);
+                    return;
+                }
 
-                this.user.permissionSets = permissionSetRecords.map(record => record['PermissionSet']['Name']);
-            },
-            runReport: async function() {
+                const permissionSetNames = permissionSetQueryResult.records.map(record => record['PermissionSet']['Name']);
+
                 this.state = 'processing';
 
                 // Read profile and permission set metadata
                 this.progress.value = 40;
                 this.progress.text = 'Reading profile...';
-                const profileMetadatas = await this.$salesforceService.readMetadata('Profile', [this.user.profile]);
+                const profileReadResult = await this.$salesforceService.readMetadata('Profile', [profileName]);
+                if (!profileReadResult.success) {
+                    console.error(profileReadResult.error);
+                    return;
+                }
+
                 this.progress.text = 'Reading permission sets...';
                 this.progress.value = 60;
-                const permissionSetMetadatas = await this.$salesforceService.readMetadata('PermissionSet', this.user.permissionSets);
+                const permissionSetsReadResult = await this.$salesforceService.readMetadata('PermissionSet', permissionSetNames);
+                if (!permissionSetsReadResult.success) {
+                    console.error(profileReadResult.error);
+                    return;
+                }
 
                 // Merge metadata into one data structure
                 this.progress.text = 'Merging profile & permission sets...';
                 this.progress.value = 80;
-                this.summary = SalesforcePermissionsService.merge(profileMetadatas, permissionSetMetadatas);
+                this.summary = SalesforcePermissionsService.merge(profileReadResult.records, permissionSetsReadResult.records);
 
                 this.progress.text = 'Done!';
                 this.progress.value = 100;
@@ -149,8 +164,6 @@
             },
             onRefreshClick: async function() {
                 this.summary = { };
-
-                await this.loadUserInfo();
 
                 await this.runReport();
             },

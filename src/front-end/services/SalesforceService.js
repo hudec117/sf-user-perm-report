@@ -15,10 +15,19 @@ export default class SalesforceService {
         requestUrl.searchParams.set('q', soql);
 
         const response = await this._authFetch(requestUrl);
+        const responseBody = await response.json();
 
-        const result = await response.json();
-
-        return result.records;
+        if (response.ok) {
+            return {
+                success: true,
+                records: responseBody.records
+            };
+        } else {
+            return {
+                success: false,
+                error: responseBody.map(error => error.message).join('\n')
+            };
+        }
     }
 
     async readMetadata(type, names) {
@@ -47,18 +56,23 @@ export default class SalesforceService {
                 body: message
             });
 
-            // TODO: error handling
-
             const responseXmlRaw = await response.text();
 
             const responseXml = new window.DOMParser().parseFromString(responseXmlRaw, 'text/xml');
+
+            if (!response.ok) {
+                return this._constructResultFromMetadataFault(responseXml);
+            }
 
             const recordNodes = responseXml.querySelectorAll('Envelope Body readMetadataResponse result records');
 
             allRecordNodes = allRecordNodes.concat(Array.from(recordNodes));
         }
 
-        return allRecordNodes;
+        return {
+            success: true,
+            records: allRecordNodes
+        };
     }
 
     _constructReadMetadataMessage(type, names) {
@@ -97,5 +111,19 @@ export default class SalesforceService {
                 'Authorization': 'Bearer ' + this.sessionId
             }
         });
+    }
+
+    _constructResultFromMetadataFault(responseXml) {
+        const faultNodes = responseXml.querySelectorAll('Envelope Body Fault faultcode');
+
+        let faultCode = 'unknown';
+        if (faultNodes.length > 0) {
+            faultCode = faultNodes[0].textContent;
+        }
+
+        return {
+            success: false,
+            error: `Metadata operation failed with fault ${faultCode}`
+        };
     }
 }
