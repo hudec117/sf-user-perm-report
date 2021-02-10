@@ -21,6 +21,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     } else if (request.operation == 'get-session') {
         const serverUrl = `https://${request.host}`;
 
+        // TODO: error handling
         chrome.cookies.get({ name: 'sid', url: serverUrl }, function (cookie) {
             const sessionId = cookie.value;
 
