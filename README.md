@@ -20,13 +20,15 @@ This extension is available on the [Chrome Web Store](https://chrome.google.com/
 
 Navigate to any user detail record in Classic or Lightning and click the "Open Permission Report" button next to the "Change Password" button.
 
-## Screenshots
-
-<img src="branding/user-detail-screenshot.jpg" width="400">
-<img src="branding/filter-screenshot.png" width="400">
-
 ## Support
 
 Please create an issue using the Bug Report template and provide the information requested in the template.
 
 **If you do not have a GitHub account**, please use the "Support" section on the Chrome Web Store listing.
+
+## Screenshots
+
+<p>
+    <img src="branding/user-detail-screenshot.jpg" height="255">
+    <img src="branding/filter-screenshot.png" height="255">
+</p>
