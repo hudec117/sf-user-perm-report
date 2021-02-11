@@ -2,7 +2,7 @@
     <b-container fluid>
         <b-row>
             <b-col>
-                <b-alert variant="warning" v-bind:show="alert !== ''" class="mb-0 mt-3">{{ alert }}</b-alert>
+                <b-alert variant="warning" :show="alert !== ''" class="mb-0 mt-3">{{ alert }}</b-alert>
             </b-col>
         </b-row>
         <b-row class="mt-3">
@@ -11,13 +11,23 @@
                     <b-icon-arrow-clockwise class="mr-2"></b-icon-arrow-clockwise> {{ user.name }}
                 </b-button>
             </b-col>
+            <b-col sm="auto" class="pr-0">
+                <b-button-group size="lg">
+                    <b-button variant="secondary" :disabled="!canRefreshReport" @click="onExpandAllClick" title="Expand All (may freeze)">
+                        <b-icon-arrows-expand></b-icon-arrows-expand>
+                    </b-button>
+                    <b-button variant="secondary" :disabled="!canRefreshReport" @click="onCollapseAllClick" title="Collapse All">
+                        <b-icon-arrows-collapse></b-icon-arrows-collapse>
+                    </b-button>
+                </b-button-group>
+            </b-col>
             <b-col sm="3" class="pr-0">
                 <b-input-group>
                     <b-input type="text"
                              size="lg"
-                             v-bind:value="filter"
+                             :value="filter"
                              :disabled="!canRefreshReport"
-                             placeholder="Filter..."
+                             placeholder="Filter metadata names..."
                              v-debounce="onFilterUpdate">
                     </b-input>
                     <b-input-group-append>
@@ -37,7 +47,7 @@
         </b-row>
         <b-row class="mt-3">
             <b-col>
-                <Table :summary="summary" :filter="filter" />
+                <Table ref="table" :summary="summary" :filter="filter" />
             </b-col>
         </b-row>
     </b-container>
@@ -172,6 +182,12 @@
                 this.summary = { };
 
                 await this.runReport();
+            },
+            onCollapseAllClick: function() {
+                this.$refs.table.setTypeCollapse(true);
+            },
+            onExpandAllClick: function() {
+                this.$refs.table.setTypeCollapse(false);
             },
             onFilterUpdate: function(newFilter) {
                 if (newFilter.trim() !== '') {

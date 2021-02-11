@@ -164,6 +164,11 @@
             },
             onRowClick: function(item) {
                 item._showDetails = !item._showDetails;
+            },
+            setTypeCollapse: function(collapsed) {
+                for (const typeName of Object.keys(this.typeCollapse)) {
+                    this.typeCollapse[typeName] = collapsed;
+                }
             }
         }
     };
