@@ -29,6 +29,6 @@ Please create an issue using the Bug Report template and provide the information
 ## Screenshots
 
 <p>
-    <img src="branding/user-detail-screenshot.jpg" height="255">
-    <img src="branding/filter-screenshot.png" height="255">
+    <img src="branding/user-detail-screenshot.jpg" height="230">
+    <img src="branding/filter-screenshot.png" height="230">
 </p>
