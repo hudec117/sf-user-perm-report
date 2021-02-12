@@ -1,7 +1,7 @@
 {
     "name": "Salesforce User Permission Report",
     "description": "Report showing granted permissions to a user from profile and permission sets. Accessible from user detail page.",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "author": "Aurel Hudec",
     "homepage_url": "https://github.com/hudec117/sf-user-perm-report",
     "incognito": "split",
