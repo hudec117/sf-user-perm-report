@@ -1,0 +1,201 @@
+<template>
+    <b-container fluid>
+        <b-row>
+            <b-col>
+                <b-alert variant="warning" :show="alert !== ''" class="mb-0 mt-3">{{ alert }}</b-alert>
+            </b-col>
+        </b-row>
+        <b-row class="mt-3">
+            <b-col sm="auto" class="pr-0">
+                <b-button variant="primary" size="lg" :disabled="!canRefreshReport" @click="onRefreshClick" title="Refresh">
+                    <b-icon-arrow-clockwise class="mr-2"></b-icon-arrow-clockwise> {{ user.name }}
+                </b-button>
+            </b-col>
+            <b-col sm="auto" class="pr-0">
+                <b-button-group size="lg">
+                    <b-button variant="secondary" :disabled="!canRefreshReport" @click="onExpandAllClick" title="Expand All (may freeze)">
+                        <b-icon-arrows-expand></b-icon-arrows-expand>
+                    </b-button>
+                    <b-button variant="secondary" :disabled="!canRefreshReport" @click="onCollapseAllClick" title="Collapse All">
+                        <b-icon-arrows-collapse></b-icon-arrows-collapse>
+                    </b-button>
+                </b-button-group>
+            </b-col>
+            <b-col sm="3" class="pr-0">
+                <b-input-group>
+                    <b-input type="text"
+                             size="lg"
+                             :value="filter"
+                             :disabled="!canRefreshReport"
+                             placeholder="Filter metadata names..."
+                             v-debounce="onFilterUpdate">
+                    </b-input>
+                    <b-input-group-append>
+                        <b-button variant="secondary" :disabled="!canClearFilter" @click="filter = ''">
+                            <b-icon-x-circle></b-icon-x-circle>
+                        </b-button>
+                    </b-input-group-append>
+                </b-input-group>
+            </b-col>
+            <b-col>
+                <b-progress height="46px">
+                    <b-progress-bar :value="progress.value">
+                        <h5 class="mt-1">{{ progress.text }}</h5>
+                    </b-progress-bar>
+                </b-progress>
+            </b-col>
+        </b-row>
+        <b-row class="mt-3">
+            <b-col>
+                <Table ref="table" :summary="summary" :filter="filter" />
+            </b-col>
+        </b-row>
+    </b-container>
+</template>
+
+<script>
+    import Vue from 'vue';
+    import Table from './Table.vue';
+
+    import SalesforceService from './services/SalesforceService.js';
+    import SalesforcePermissionsService from './services/SalesforcePermissionsService.js';
+
+    export default {
+        components: {
+            Table
+        },
+        data() {
+            return {
+                state: 'loading',
+                alert: '',
+                progress: {
+                    value: 0,
+                    text: ''
+                },
+                serverHost: '',
+                user: {
+                    id: '',
+                    name: ''
+                },
+                sessionId: '',
+                filter: '',
+                summary: { }
+            };
+        },
+        computed: {
+            canRefreshReport: function() {
+                return this.state === 'ready';
+            },
+            canClearFilter: function() {
+                return this.canRefreshReport && this.filter;
+            }
+        },
+        mounted: function() {
+            this.initialise();
+        },
+        methods: {
+            initialise: function() {
+                // Initialise server host and user ID from URL
+                const params = new URLSearchParams(window.location.search);
+                this.serverHost = params.get('host');
+                this.user.id = params.get('user');
+
+                // Initialise session ID
+                const self = this;
+                chrome.runtime.sendMessage({ operation: 'get-session', host: this.serverHost }, async function(session) {
+                    self.sessionId = session.id;
+
+                    // Initialise Salesforce service
+                    Vue.prototype.$salesforceService = new SalesforceService(self.serverHost, self.sessionId);
+
+                    // Run the report
+                    await self.runReport();
+                });
+            },
+            runReport: async function() {
+                this.state = 'loading';
+
+                this.progress.value = 20;
+                this.progress.text = 'Getting user info...';
+
+                // Get the users name and profile ID
+                const userQuery = `SELECT Username, ProfileId FROM User WHERE Id = '${this.user.id}'`;
+                const userQueryResult = await this.$salesforceService.query(userQuery);
+                if (!userQueryResult.success) {
+                    this.alert = userQueryResult.error;
+                    return;
+                }
+
+                const userRecord = userQueryResult.records[0];
+                this.user.name = userRecord['Username'];
+
+                // Get the profile full name
+                const profileId = userRecord['ProfileId'];
+                const profileQuery = `SELECT FullName FROM Profile WHERE Id = '${profileId}'`;
+                const profileQueryResult = await this.$salesforceService.query(profileQuery, true);
+                if (!profileQueryResult.success) {
+                    this.alert = profileQueryResult.error;
+                    return;
+                }
+
+                const profileName = profileQueryResult.records[0]['FullName'];
+
+                // Get user permission sets
+                const permissionSetQuery = `SELECT PermissionSet.Name FROM PermissionSetAssignment WHERE AssigneeId = '${this.user.id}' AND PermissionSet.IsCustom = true`;
+                const permissionSetQueryResult = await this.$salesforceService.query(permissionSetQuery);
+                if (!permissionSetQueryResult.success) {
+                    this.alert = permissionSetQueryResult.error;
+                    return;
+                }
+
+                const permissionSetNames = permissionSetQueryResult.records.map(record => record['PermissionSet']['Name']);
+
+                this.state = 'processing';
+
+                // Read profile and permission set metadata
+                this.progress.value = 40;
+                this.progress.text = 'Reading profile...';
+                const profileReadResult = await this.$salesforceService.readMetadata('Profile', [profileName]);
+                if (!profileReadResult.success) {
+                    this.alert = profileReadResult.error;
+                    return;
+                }
+
+                this.progress.text = 'Reading permission sets...';
+                this.progress.value = 60;
+                const permissionSetsReadResult = await this.$salesforceService.readMetadata('PermissionSet', permissionSetNames);
+                if (!permissionSetsReadResult.success) {
+                    this.alert = permissionSetsReadResult.error;
+                    return;
+                }
+
+                // Merge metadata into one data structure
+                this.progress.text = 'Merging profile & permission sets...';
+                this.progress.value = 80;
+                this.summary = SalesforcePermissionsService.merge(profileReadResult.records, permissionSetsReadResult.records);
+
+                this.progress.text = 'Done!';
+                this.progress.value = 100;
+                this.state = 'ready';
+            },
+            onRefreshClick: async function() {
+                this.summary = { };
+
+                await this.runReport();
+            },
+            onCollapseAllClick: function() {
+                this.$refs.table.setTypeCollapse(true);
+            },
+            onExpandAllClick: function() {
+                this.$refs.table.setTypeCollapse(false);
+            },
+            onFilterUpdate: function(newFilter) {
+                if (newFilter.trim() !== '') {
+                    this.filter = newFilter;
+                } else {
+                    this.filter = '';
+                }
+            }
+        }
+    };
+</script>

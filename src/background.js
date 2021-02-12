@@ -1,4 +1,4 @@
-const USER_PERM_REPORT_PAGE = 'report-page.html';
+const USER_PERM_REPORT_PAGE = 'public/report-page.html';
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.operation == 'open-report') {
@@ -21,6 +21,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     } else if (request.operation == 'get-session') {
         const serverUrl = `https://${request.host}`;
 
+        // TODO: error handling
         chrome.cookies.get({ name: 'sid', url: serverUrl }, function (cookie) {
             const sessionId = cookie.value;
 

@@ -1,0 +1,29 @@
+{
+    "name": "Salesforce User Permission Report",
+    "description": "Report showing granted permissions to a user from profile and permission sets. Accessible from user detail page.",
+    "version": "1.0.0",
+    "author": "Aurel Hudec",
+    "homepage_url": "https://github.com/hudec117/sf-user-perm-report",
+    "incognito": "split",
+    "minimum_chrome_version": "88",
+    "manifest_version": 3,
+    "permissions": [
+        "cookies"
+    ],
+    "host_permissions": [
+        "https://*.my.salesforce.com/"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' http://localhost:8098; object-src 'self'"
+    },
+    "content_scripts": [
+        {
+            "matches": [ "https://*.my.salesforce.com/*" ],
+            "all_frames": true,
+            "js": [ "content-script.js" ]
+        }
+    ]
+}
