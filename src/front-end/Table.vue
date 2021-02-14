@@ -42,10 +42,10 @@
                                 <b-tr v-for="permissionSetName of permissionSetNames" :key="permissionSetName">
                                     <b-td class="fit-column">{{ permissionSetName }}</b-td>
                                     <b-td v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">
-                                        <span v-if="permissionSetName in row.item.permissionToPermissionSetLookup[permissionName]">
-                                            {{ row.item.permissionToPermissionSetLookup[permissionName][permissionSetName] | sentenceCase }}
-                                        </span>
-                                        <span class="text-muted" v-else>Unset</span>
+                                        <PermissionValue :permission="permissionName"
+                                                         :permissionSetName="permissionSetName"
+                                                         :lookup="row.item.permissionToPermissionSetLookup">
+                                        </PermissionValue>
                                     </b-td>
                                 </b-tr>
                             </b-tbody>
@@ -59,6 +59,8 @@
 
 <script>
     import Vue from 'vue';
+
+    import PermissionValue from './components/PermissionValue.vue';
 
     const METADATA_NODE_TO_LABEL_LOOKUP = {
         'applicationVisibilities': 'Assigned Apps',
@@ -79,6 +81,9 @@
     };
 
     export default {
+        components: {
+            PermissionValue
+        },
         props: ['summary', 'filter'],
         data: function() {
             return {
