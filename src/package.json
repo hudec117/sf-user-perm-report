@@ -22,7 +22,6 @@
     "dependencies": {
         "bootstrap-vue": "^2.21.2",
         "bootswatch": "^4.6.0",
-        "vue": "^2.6.12",
-        "vue-debounce": "^2.6.0"
+        "vue": "^2.6.12"
     }
 }

@@ -93,11 +93,25 @@
                 // Initialise server host and user ID from URL
                 const params = new URLSearchParams(window.location.search);
                 this.serverHost = params.get('host');
+                if (!this.serverHost) {
+                    this.alert = 'Missing server host, please launch the report from a user record.';
+                    return;
+                }
+
                 this.user.id = params.get('user');
+                if (!this.user.id) {
+                    this.alert = 'Missing user ID, please launch the report from a user record.';
+                    return;
+                }
 
                 // Initialise session ID
                 const self = this;
                 chrome.runtime.sendMessage({ operation: 'get-session', host: this.serverHost }, async function(session) {
+                    if (!session.id) {
+                        self.alert = 'Missing session ID, your sesion may have expired or you\'ve been logged out. Log back in and refresh.';
+                        return;
+                    }
+
                     self.sessionId = session.id;
 
                     // Initialise Salesforce service

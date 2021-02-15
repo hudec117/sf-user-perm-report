@@ -1,6 +1,5 @@
 import App from './App.vue';
 import Vue from 'vue';
-import VueDebounce from 'vue-debounce';
 
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
 
@@ -9,7 +8,6 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
-Vue.use(VueDebounce);
 
 new Vue({
     el: '#app',
