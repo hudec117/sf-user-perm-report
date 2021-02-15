@@ -4,7 +4,7 @@ import VueDebounce from 'vue-debounce';
 
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
 
-import 'bootswatch/dist/cosmo/bootstrap.min.css';
+import 'bootswatch/dist/darkly/bootstrap.min.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 Vue.use(BootstrapVue);
