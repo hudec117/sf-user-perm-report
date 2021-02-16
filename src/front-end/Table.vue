@@ -8,8 +8,8 @@
 
         <div class="card mb-2" v-for="(type, typeName) of filteredSummary" :key="typeName">
             <div class="card-header border-bottom-0" @click="onTypeCollapseClick(typeName)">
-                <b-icon-chevron-right v-if="typeCollapse[typeName]"></b-icon-chevron-right>
-                <b-icon-chevron-down v-else></b-icon-chevron-down>
+                <b-icon-plus scale="1.5" v-if="typeCollapse[typeName]"></b-icon-plus>
+                <b-icon-dash scale="1.5" v-else></b-icon-dash>
                 <span class="ml-1">{{ typeName | metadataNodeNameToLabel }}</span>
             </div>
             <div class="card-body p-0" v-if="!typeCollapse[typeName]">
@@ -24,8 +24,8 @@
                          fixed
                          small>
                     <template #cell(show_details)="row">
-                        <b-icon-chevron-right v-if="!row.detailsShowing"></b-icon-chevron-right>
-                        <b-icon-chevron-down v-else></b-icon-chevron-down>
+                        <b-icon-plus scale="1.5" v-if="!row.detailsShowing"></b-icon-plus>
+                        <b-icon-dash scale="1.5" v-else></b-icon-dash>
                     </template>
 
                     <template #row-details="row">
@@ -42,10 +42,10 @@
                                 <b-tr v-for="permissionSetName of permissionSetNames" :key="permissionSetName">
                                     <b-td class="fit-column">{{ permissionSetName }}</b-td>
                                     <b-td v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">
-                                        <span v-if="permissionSetName in row.item.permissionToPermissionSetLookup[permissionName]">
-                                            {{ row.item.permissionToPermissionSetLookup[permissionName][permissionSetName] | sentenceCase }}
-                                        </span>
-                                        <span class="text-muted" v-else>Unset</span>
+                                        <PermissionValue :permission="permissionName"
+                                                         :permissionSetName="permissionSetName"
+                                                         :lookup="row.item.permissionToPermissionSetLookup">
+                                        </PermissionValue>
                                     </b-td>
                                 </b-tr>
                             </b-tbody>
@@ -59,6 +59,8 @@
 
 <script>
     import Vue from 'vue';
+
+    import PermissionValue from './components/PermissionValue.vue';
 
     const METADATA_NODE_TO_LABEL_LOOKUP = {
         'applicationVisibilities': 'Assigned Apps',
@@ -79,6 +81,9 @@
     };
 
     export default {
+        components: {
+            PermissionValue
+        },
         props: ['summary', 'filter'],
         data: function() {
             return {
@@ -203,7 +208,7 @@
     padding-left: 2rem !important;
 }
 
-.fit-column  {
+.fit-column {
     width: 1%;
     min-width: 165px;
 }

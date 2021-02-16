@@ -7,42 +7,37 @@
         </b-row>
         <b-row class="mt-3">
             <b-col sm="auto" class="pr-0">
-                <b-button variant="primary" size="lg" :disabled="!canRefreshReport" @click="onRefreshClick" title="Refresh">
-                    <b-icon-arrow-clockwise class="mr-2"></b-icon-arrow-clockwise> {{ user.name }}
+                <b-button variant="primary" size="lg" :disabled="!canRefreshReport" @click="onRefreshClick"  v-b-tooltip.hover.bottom title="Refresh">
+                    <b-icon-arrow-clockwise class="mr-2" :animation="refreshIconAnimation"></b-icon-arrow-clockwise> {{ user.name }}
                 </b-button>
             </b-col>
             <b-col sm="auto" class="pr-0">
                 <b-button-group size="lg">
-                    <b-button variant="secondary" :disabled="!canRefreshReport" @click="onExpandAllClick" title="Expand All (may freeze)">
-                        <b-icon-arrows-expand></b-icon-arrows-expand>
+                    <b-button variant="secondary"
+                              :disabled="!canRefreshReport"
+                              @click="onExpandAllClick"
+                              v-b-tooltip.hover.bottom
+                              title="Expand All"
+                              class="mr-1">
+                        <b-icon-plus></b-icon-plus>
                     </b-button>
-                    <b-button variant="secondary" :disabled="!canRefreshReport" @click="onCollapseAllClick" title="Collapse All">
-                        <b-icon-arrows-collapse></b-icon-arrows-collapse>
+                    <b-button variant="secondary"
+                              :disabled="!canRefreshReport"
+                              @click="onCollapseAllClick"
+                              v-b-tooltip.hover.bottom
+                              title="Collapse All">
+                        <b-icon-dash></b-icon-dash>
                     </b-button>
                 </b-button-group>
             </b-col>
-            <b-col sm="3" class="pr-0">
-                <b-input-group>
-                    <b-input type="text"
-                             size="lg"
-                             :value="filter"
-                             :disabled="!canRefreshReport"
-                             placeholder="Filter metadata names..."
-                             v-debounce="onFilterUpdate">
-                    </b-input>
-                    <b-input-group-append>
-                        <b-button variant="secondary" :disabled="!canClearFilter" @click="filter = ''">
-                            <b-icon-x-circle></b-icon-x-circle>
-                        </b-button>
-                    </b-input-group-append>
-                </b-input-group>
-            </b-col>
             <b-col>
-                <b-progress height="46px">
-                    <b-progress-bar :value="progress.value">
-                        <h5 class="mt-1">{{ progress.text }}</h5>
-                    </b-progress-bar>
-                </b-progress>
+                <b-input type="search"
+                         size="lg"
+                         :value="filter"
+                         :disabled="!canRefreshReport"
+                         placeholder="Search metadata..."
+                         @search="onSearchUpdate">
+                </b-input>
             </b-col>
         </b-row>
         <b-row class="mt-3">
@@ -86,8 +81,8 @@
             canRefreshReport: function() {
                 return this.state === 'ready';
             },
-            canClearFilter: function() {
-                return this.canRefreshReport && this.filter;
+            refreshIconAnimation: function() {
+                return this.state === 'loading' ? 'spin' : '';
             }
         },
         mounted: function() {
@@ -98,11 +93,25 @@
                 // Initialise server host and user ID from URL
                 const params = new URLSearchParams(window.location.search);
                 this.serverHost = params.get('host');
+                if (!this.serverHost) {
+                    this.alert = 'Missing server host, please launch the report from a user record.';
+                    return;
+                }
+
                 this.user.id = params.get('user');
+                if (!this.user.id) {
+                    this.alert = 'Missing user ID, please launch the report from a user record.';
+                    return;
+                }
 
                 // Initialise session ID
                 const self = this;
                 chrome.runtime.sendMessage({ operation: 'get-session', host: this.serverHost }, async function(session) {
+                    if (!session.id) {
+                        self.alert = 'Missing session ID, your sesion may have expired or you\'ve been logged out. Log back in and refresh.';
+                        return;
+                    }
+
                     self.sessionId = session.id;
 
                     // Initialise Salesforce service
@@ -114,9 +123,6 @@
             },
             runReport: async function() {
                 this.state = 'loading';
-
-                this.progress.value = 20;
-                this.progress.text = 'Getting user info...';
 
                 // Get the users name and profile ID
                 const userQuery = `SELECT Username, ProfileId FROM User WHERE Id = '${this.user.id}'`;
@@ -141,7 +147,7 @@
                 const profileName = profileQueryResult.records[0]['FullName'];
 
                 // Get user permission sets
-                const permissionSetQuery = `SELECT PermissionSet.Name FROM PermissionSetAssignment WHERE AssigneeId = '${this.user.id}' AND PermissionSet.IsCustom = true`;
+                const permissionSetQuery = `SELECT PermissionSet.Name FROM PermissionSetAssignment WHERE AssigneeId = '${this.user.id}' AND PermissionSet.IsCustom = true AND PermissionSet.NamespacePrefix = ''`;
                 const permissionSetQueryResult = await this.$salesforceService.query(permissionSetQuery);
                 if (!permissionSetQueryResult.success) {
                     this.alert = permissionSetQueryResult.error;
@@ -150,19 +156,13 @@
 
                 const permissionSetNames = permissionSetQueryResult.records.map(record => record['PermissionSet']['Name']);
 
-                this.state = 'processing';
-
                 // Read profile and permission set metadata
-                this.progress.value = 40;
-                this.progress.text = 'Reading profile...';
                 const profileReadResult = await this.$salesforceService.readMetadata('Profile', [profileName]);
                 if (!profileReadResult.success) {
                     this.alert = profileReadResult.error;
                     return;
                 }
 
-                this.progress.text = 'Reading permission sets...';
-                this.progress.value = 60;
                 const permissionSetsReadResult = await this.$salesforceService.readMetadata('PermissionSet', permissionSetNames);
                 if (!permissionSetsReadResult.success) {
                     this.alert = permissionSetsReadResult.error;
@@ -170,12 +170,8 @@
                 }
 
                 // Merge metadata into one data structure
-                this.progress.text = 'Merging profile & permission sets...';
-                this.progress.value = 80;
                 this.summary = SalesforcePermissionsService.merge(profileReadResult.records, permissionSetsReadResult.records);
 
-                this.progress.text = 'Done!';
-                this.progress.value = 100;
                 this.state = 'ready';
             },
             onRefreshClick: async function() {
@@ -189,7 +185,9 @@
             onExpandAllClick: function() {
                 this.$refs.table.setTypeCollapse(false);
             },
-            onFilterUpdate: function(newFilter) {
+            onSearchUpdate: function(event) {
+                const newFilter = event.currentTarget.value;
+
                 if (newFilter.trim() !== '') {
                     this.filter = newFilter;
                 } else {
