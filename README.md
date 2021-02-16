@@ -3,7 +3,7 @@
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/v/gkibdicghcpcikhjpgjoijpobdipklnp?style=flat-square)
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/users/gkibdicghcpcikhjpgjoijpobdipklnp)
 
-Salesforce User Permission Report allows you to see a report of all the permissions a user has and which permission set or profile grants the permission.
+Salesforce User Permission Report allows you to see a report of all the permissions a user has and where they are set.
 
 #### Features
  - Dark mode
