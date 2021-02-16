@@ -3,7 +3,7 @@
         <!-- If it's true/false permission we display it as a checkbox -->
         <template v-if="isCheckboxPermission">
             <!-- 
-                Here we have to use custom HTMl instead of <b-form-checkbox> because otherwise ".prevent.stop" would not work and
+                Here we have to use custom HTML instead of <b-form-checkbox> because otherwise ".prevent.stop" would not work and
                 the user would be allowed to change the state of the checkbox.
             -->
             <div class="custom-control custom-checkbox">
@@ -35,7 +35,13 @@
                     return false;
                 }
 
-                return this.lookup[this.permission][this.permissionSetName];
+                const value = this.lookup[this.permission][this.permissionSetName]; 
+
+                if (this.isCheckboxPermission) {
+                    return value === 'true';
+                }
+
+                return value;
             }
         }
     };
