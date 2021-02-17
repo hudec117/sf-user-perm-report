@@ -6,8 +6,8 @@
 Salesforce User Permission Report allows you to see a report of all the permissions a user has and where they are set.
 
 #### Features
+ - Search
  - Dark mode
- - Filtering
  - Intuitive tree view
  - Consolidated view of user permissions
  - Compatible with Classic and Lightning Experience
