@@ -147,7 +147,7 @@
                 const profileName = profileQueryResult.records[0]['FullName'];
 
                 // Get user permission sets
-                const permissionSetQuery = `SELECT PermissionSet.Name FROM PermissionSetAssignment WHERE AssigneeId = '${this.user.id}' AND PermissionSet.IsCustom = true AND PermissionSet.NamespacePrefix = ''`;
+                const permissionSetQuery = `SELECT PermissionSet.Name FROM PermissionSetAssignment WHERE AssigneeId = '${this.user.id}' AND PermissionSet.IsCustom = true AND PermissionSet.NamespacePrefix = '' AND PermissionSet.IsOwnedByProfile = false`;
                 const permissionSetQueryResult = await this.$salesforceService.query(permissionSetQuery);
                 if (!permissionSetQueryResult.success) {
                     this.alert = permissionSetQueryResult.error;
