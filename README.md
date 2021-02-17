@@ -1,4 +1,4 @@
-# Salesforce User Permission Report
+# SUPR - Salesforce User Permission Report
 
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/v/gkibdicghcpcikhjpgjoijpobdipklnp?style=flat-square)
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/users/gkibdicghcpcikhjpgjoijpobdipklnp)
@@ -36,14 +36,20 @@ Navigate to any user detail record in Classic or Lightning and click the "Open P
     <img src="branding/screenshots/object-perms.jpg" height="230">
 </p>
 
+## Q&A
+
+**Q**: What does "Session expired or invalid"/"INVALID_SESSION_ID" mean?
+
+**A**: This is because your session has timed out and you've been logged out of Salesforce, please log back in and refresh the page.
+
+<br />
+
+**Q**: Is this extension available on Edge/Firefox/Safari?
+
+**A**: I plan on making the extension available on the latest Edge and Firefox versions. I do not have a Mac so I'm not planning for Safari support.
+
 ## Support
 
 Please create an issue using the Bug Report template and provide the information requested in the template.
 
 **If you do not have a GitHub account**, please use the "Support" section on the Chrome Web Store listing.
-
-## FAQ
-
-**Q**: What does "Session expired or invalid"/"INVALID_SESSION_ID" mean?
-
-**A**: This is because your session has timed out and you've been logged out of Salesforce, please log back in and refresh the page.

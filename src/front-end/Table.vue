@@ -6,54 +6,10 @@
         <!-- "permission" refers to the permission name like AuthorApex, Enabled, Visible, Readable etc -->
         <!-- "permission value" or "value" refers to the value set for the permission such as DefaultOn, True, False etc -->
 
-        <div class="card mb-2" v-for="(type, typeName) of filteredSummary" :key="typeName">
-            <div class="card-header border-bottom-0" @click="onTypeCollapseClick(typeName)">
-                <b-icon-plus scale="1.5" v-if="typeCollapse[typeName]"></b-icon-plus>
-                <b-icon-dash scale="1.5" v-else></b-icon-dash>
-                <span class="ml-1">{{ typeName | metadataNodeNameToLabel }}</span>
-            </div>
-            <div class="card-body p-0" v-if="!typeCollapse[typeName]">
-                <b-table :items="type"
-                         :fields="itemFields"
-                         primary-key="item"
-                         @row-clicked="onRowClick"
-                         thead-class="hidden-header"
-                         tbody-tr-class="clickable-row"
-                         details-td-class="padded-row"
-                         table-class="mb-0"
-                         fixed
-                         small>
-                    <template #cell(show_details)="row">
-                        <b-icon-plus scale="1.5" v-if="!row.detailsShowing"></b-icon-plus>
-                        <b-icon-dash scale="1.5" v-else></b-icon-dash>
-                    </template>
-
-                    <template #row-details="row">
-                        <b-table-simple small bordered hover responsive class="mb-0">
-                            <b-thead>
-                                <b-tr>
-                                    <b-th>Profile/Permission Set</b-th>
-                                    <b-th v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">
-                                        {{ permissionName | sentenceCase }}
-                                    </b-th>
-                                </b-tr>
-                            </b-thead>
-                            <b-tbody>
-                                <b-tr v-for="permissionSetName of permissionSetNames" :key="permissionSetName">
-                                    <b-td class="fit-column">{{ permissionSetName }}</b-td>
-                                    <b-td v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">
-                                        <PermissionValue :permission="permissionName"
-                                                         :permissionSetName="permissionSetName"
-                                                         :lookup="row.item.permissionToPermissionSetLookup">
-                                        </PermissionValue>
-                                    </b-td>
-                                </b-tr>
-                            </b-tbody>
-                        </b-table-simple>
-                    </template>
-                </b-table>
-            </div>
-        </div>
+        <metadata-type-card v-for="(s, typeName) of filteredSummary" 
+                            :key="typeName"
+                            :name="typeName">
+        </metadata-type-card>
     </div>
 </template>
 
@@ -61,6 +17,7 @@
     import Vue from 'vue';
 
     import PermissionValue from './components/PermissionValue.vue';
+    import MetadataTypeCard from './components/MetadataTypeCard.vue';
 
     const METADATA_NODE_TO_LABEL_LOOKUP = {
         'applicationVisibilities': 'Assigned Apps',
@@ -82,7 +39,8 @@
 
     export default {
         components: {
-            PermissionValue
+            PermissionValue,
+            MetadataTypeCard
         },
         props: ['summary', 'filter'],
         data: function() {
