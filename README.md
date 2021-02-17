@@ -1,4 +1,4 @@
-# Salesforce User Permission Report
+# SUPR - Salesforce User Permission Report
 
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/v/gkibdicghcpcikhjpgjoijpobdipklnp?style=flat-square)
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/users/gkibdicghcpcikhjpgjoijpobdipklnp)
@@ -6,13 +6,21 @@
 Salesforce User Permission Report allows you to see a report of all the permissions a user has and where they are set.
 
 #### Features
+ - Search
  - Dark mode
- - Filtering
  - Intuitive tree view
  - Consolidated view of user permissions
  - Compatible with Classic and Lightning Experience
 
+<br />
+
+**See Q&A below for "Not Compatible" error on Chrome Web Store.**
+
+<br />
+
 ## Download
+
+Please ensure you are running Chrome 88 or later.
 
 <a href="https://chrome.google.com/webstore/detail/salesforce-user-permissio/gkibdicghcpcikhjpgjoijpobdipklnp">
 
@@ -36,14 +44,30 @@ Navigate to any user detail record in Classic or Lightning and click the "Open P
     <img src="branding/screenshots/object-perms.jpg" height="230">
 </p>
 
+## Q&A
+
+**Q**: I can't install the extension because it says "Not Compatible" on Chrome Web Store?
+
+**A**: The extension requires Chrome 88 or later, to make sure you're on the latest Chrome version:
+1. At the top right, click the 3 vertical dots.
+2. Click Help -> About Google Chrome.
+3. Wait for Chrome to download update.
+4. Relaunch Chrome.
+
+<br />
+
+**Q**: What does "Session expired or invalid"/"INVALID_SESSION_ID" mean?
+
+**A**: This is because your session has timed out and you've been logged out of Salesforce, please log back in and refresh the page.
+
+<br />
+
+**Q**: Is this extension available on Edge/Firefox/Safari?
+
+**A**: I plan on making the extension available on the latest Edge and Firefox versions. I do not have a Mac so I'm not planning for Safari support - if anyone does have a Mac and wants to work on Safari Support, please reach out.
+
 ## Support
 
 Please create an issue using the Bug Report template and provide the information requested in the template.
 
 **If you do not have a GitHub account**, please use the "Support" section on the Chrome Web Store listing.
-
-## FAQ
-
-**Q**: What does "Session expired or invalid"/"INVALID_SESSION_ID" mean?
-
-**A**: This is because your session has timed out and you've been logged out of Salesforce, please log back in and refresh the page.
