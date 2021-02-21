@@ -5,13 +5,24 @@
 
 Salesforce User Permission Report allows you to see a report of all the permissions a user has and where they are set.
 
-#### Features
+Features
  - Search
  - Dark mode
  - Intuitive tree view
  - Consolidated view of user permissions
  - Compatible with Classic and Lightning Experience
 
+Roadmap
+ - Firefox support
+ - Edge support
+ - Modifying & saving permissions
+ - Toggle managed metadata
+ - Toggle between labels and full names
+ - Toggle showing only granted permissions
+ - Rendering performance improvements
+ - Dynamic Salesforce API selection
+ - Various QoL & UI improvements
+ 
 ## Download
 
 <a href="https://chrome.google.com/webstore/detail/salesforce-user-permissio/gkibdicghcpcikhjpgjoijpobdipklnp">

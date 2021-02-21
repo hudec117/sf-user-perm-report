@@ -5,7 +5,7 @@
                 <b-th>Name</b-th>
                 <!-- <b-th>Label</b-th> -->
                 <b-th>Type</b-th>
-                <b-th v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">
+                <b-th v-for="(_, permissionName) of row.item.permissions" :key="permissionName">
                     {{ permissionName | sentenceCase }}
                 </b-th>
             </b-tr>
@@ -19,13 +19,19 @@
                 </b-td>
                 <!-- <b-td class="fit-column">{{ permissionSetName }}</b-td> -->
                 <b-td class="fit-column">{{ metadataInfoLookup[permissionSetName].type | sentenceCase }}</b-td>
-                <b-td v-for="(_, permissionName) of row.item.permissionToPermissionSetLookup" :key="permissionName">
+                <b-td v-for="(_, permissionName) of row.item.permissions" :key="permissionName">
                     <PermissionValue :permission="permissionName"
-                                        :permissionSetName="permissionSetName"
-                                        :lookup="row.item.permissionToPermissionSetLookup">
+                                     :permissionSetName="permissionSetName"
+                                     :lookup="row.item.permissions">
                     </PermissionValue>
                 </b-td>
             </b-tr>
         </b-tbody>
     </b-table-simple>
 </template>
+
+<script>
+    export default {
+        props: []
+    };
+</script>

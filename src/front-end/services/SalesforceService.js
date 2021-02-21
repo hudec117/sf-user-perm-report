@@ -30,7 +30,7 @@ export default class SalesforceService {
         }
     }
 
-    async readMetadata(type, names) {
+    async readMetadata(type, names, progressCallback) {
         let allRecordNodes = [];
 
         // The Metadata API readMetadata() call only supports reading 10 pieces
@@ -43,8 +43,14 @@ export default class SalesforceService {
             nameBatches.push(newNameBatch);
         }
 
+        let metadataRead = 0;
+
         for (const nameBatch of nameBatches) {
             const message = this._constructReadMetadataMessage(type, nameBatch);
+
+            if (progressCallback) {
+                progressCallback(metadataRead);
+            }
 
             const requestUrl = new URL(METADATA_ENDPOINT, this.serverBaseUrl);
             const response = await fetch(requestUrl, {
@@ -66,7 +72,11 @@ export default class SalesforceService {
 
             const recordNodes = responseXml.querySelectorAll('Envelope Body readMetadataResponse result records');
 
-            allRecordNodes = allRecordNodes.concat(Array.from(recordNodes));
+            const recordNodesArray = Array.from(recordNodes);
+
+            metadataRead += recordNodesArray.length
+
+            allRecordNodes = allRecordNodes.concat(recordNodesArray);
         }
 
         return {

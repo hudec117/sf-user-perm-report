@@ -19,7 +19,7 @@
 </template>
 
 <script>
-    const CHECKBOX_PERMISSIONS = ['default', 'visible', 'visibility', 'enabled', 'editable', 'readable', 'allowCreate', 'allowDelete', 'allowEdit', 'allowRead', 'modifyAllRecords', 'viewAllRecords'];
+    const CHECKBOX_PERMISSIONS = ['default', 'visible', 'enabled', 'editable', 'readable', 'allowCreate', 'allowDelete', 'allowEdit', 'allowRead', 'modifyAllRecords', 'viewAllRecords'];
 
     export default {
         props: ['permission', 'permissionSetName', 'lookup'],

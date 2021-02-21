@@ -7,12 +7,12 @@
         </b-row>
         <b-row class="mt-3">
             <b-col sm="auto" class="pr-0">
-                <b-button variant="primary" size="lg" :disabled="!canRefreshReport" @click="onRefreshClick"  v-b-tooltip.hover.bottom title="Refresh">
-                    <b-icon-arrow-clockwise class="mr-2" :animation="refreshIconAnimation"></b-icon-arrow-clockwise> {{ user.name }}
+                <b-button variant="primary" :disabled="!canRefreshReport" @click="onRefreshClick"  v-b-tooltip.hover.bottom title="Refresh">
+                    <b-icon-arrow-clockwise class="mr-2" :animation="refreshIconAnimation"></b-icon-arrow-clockwise> {{ state === 'loading' ? progress : user.name }}
                 </b-button>
             </b-col>
             <b-col sm="auto" class="pr-0">
-                <b-button-group size="lg">
+                <b-button-group>
                     <b-button variant="secondary"
                               :disabled="!canRefreshReport"
                               @click="onExpandAllClick"
@@ -30,10 +30,14 @@
                     </b-button>
                 </b-button-group>
             </b-col>
+            <b-col sm="auto" class="pr-0">
+                <b-form-checkbox name="check-button" :disabled="!canRefreshReport" button>
+                    Show Managed Metadata
+                </b-form-checkbox>
+            </b-col>
             <b-col>
                 <b-input type="search"
-                         size="lg"
-                         :value="filter"
+                         :value="search"
                          :disabled="!canRefreshReport"
                          placeholder="Search metadata..."
                          @search="onSearchUpdate">
@@ -42,7 +46,7 @@
         </b-row>
         <b-row class="mt-3">
             <b-col>
-                <Table ref="table" :summary="summary" :filter="filter" />
+                <Table ref="table" :summary="summary" :search="search" />
             </b-col>
         </b-row>
     </b-container>
@@ -50,7 +54,7 @@
 
 <script>
     import Vue from 'vue';
-    import Table from './Table.vue';
+    import Table from './components/Table.vue';
 
     import SalesforceService from './services/SalesforceService.js';
     import SalesforcePermissionsService from './services/SalesforcePermissionsService.js';
@@ -62,6 +66,7 @@
         data() {
             return {
                 state: 'loading',
+                progress: '',
                 alert: '',
                 progress: {
                     value: 0,
@@ -73,7 +78,7 @@
                     name: ''
                 },
                 sessionId: '',
-                filter: '',
+                search: '',
                 summary: { }
             };
         },
@@ -123,6 +128,7 @@
             },
             runReport: async function() {
                 this.state = 'loading';
+                this.progress = 'Querying user info...';
 
                 // Get the users name and profile ID
                 const userQuery = `SELECT Username, ProfileId FROM User WHERE Id = '${this.user.id}'`;
@@ -156,6 +162,8 @@
 
                 const permissionSetNames = permissionSetQueryResult.records.map(record => record['PermissionSet']['Name']);
 
+                this.progress = 'Reading profile...';
+
                 // Read profile and permission set metadata
                 const profileReadResult = await this.$salesforceService.readMetadata('Profile', [profileName]);
                 if (!profileReadResult.success) {
@@ -163,11 +171,15 @@
                     return;
                 }
 
-                const permissionSetsReadResult = await this.$salesforceService.readMetadata('PermissionSet', permissionSetNames);
+                const permissionSetsReadResult = await this.$salesforceService.readMetadata('PermissionSet', permissionSetNames, (metadataRead) => {
+                    this.progress = `Reading permission sets... (${metadataRead}/${permissionSetNames.length})`;
+                });
                 if (!permissionSetsReadResult.success) {
                     this.alert = permissionSetsReadResult.error;
                     return;
                 }
+
+                this.progress = 'Merging metadata...';
 
                 // Merge metadata into one data structure
                 this.summary = SalesforcePermissionsService.merge(profileReadResult.records, permissionSetsReadResult.records);
@@ -186,12 +198,12 @@
                 this.$refs.table.setTypeCollapse(false);
             },
             onSearchUpdate: function(event) {
-                const newFilter = event.currentTarget.value;
+                const newSearch = event.currentTarget.value;
 
-                if (newFilter.trim() !== '') {
-                    this.filter = newFilter;
+                if (newSearch.trim() !== '') {
+                    this.search = newSearch;
                 } else {
-                    this.filter = '';
+                    this.search = '';
                 }
             }
         }
