@@ -27,6 +27,10 @@
                     <b-icon-plus scale="1.5" v-if="!fieldRow.detailsShowing"></b-icon-plus>
                     <b-icon-dash scale="1.5" v-else></b-icon-dash>
                 </template>
+
+                <template #row-details="row">
+                    <permission-table :permissions="row.item.permissions"></permission-table>
+                </template>
             </b-table>
         </template>
     </b-table>
@@ -74,7 +78,8 @@
 
                     objectRow.fields.push({
                         _showDetails: false,
-                        name: fieldName
+                        name: fieldName,
+                        permissions: item.permissions
                     });
                 }
 

@@ -85,6 +85,19 @@ export default class SalesforceService {
         };
     }
 
+    async getManagedPrefixes() {
+        const namespacePrefixQuery = 'SELECT SubscriberPackage.NamespacePrefix FROM InstalledSubscriberPackage';
+        const namespacePrefixQueryResult = await this.query(namespacePrefixQuery, true);
+        if (!namespacePrefixQueryResult.success) {
+            return namespacePrefixQueryResult;
+        }
+
+        return {
+            success: true,
+            prefixes: namespacePrefixQueryResult.records.map(record => record['SubscriberPackage']['NamespacePrefix'])
+        };
+    }
+
     _constructReadMetadataMessage(type, names) {
         let message = `
         <?xml version="1.0" encoding="UTF-8"?>

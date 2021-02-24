@@ -9,6 +9,8 @@ Features
  - Search
  - Dark mode
  - Intuitive tree view
+ - Toggle managed metadata
+ - Permission Set Group support
  - Consolidated view of user permissions
  - Compatible with Classic and Lightning Experience
 
@@ -16,7 +18,6 @@ Roadmap
  - Firefox support
  - Edge support
  - Modifying & saving permissions
- - Toggle managed metadata
  - Toggle between labels and full names
  - Toggle showing only granted permissions
  - Rendering performance improvements

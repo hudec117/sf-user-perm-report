@@ -1,3 +1,5 @@
+import SalesforceService from './SalesforceService';
+
 const PERMISSION_TYPE_NODE_IDENTIFIERS = {
     'applicationVisibilities': 'application',
     'fieldPermissions': 'field',
@@ -16,8 +18,65 @@ const PERMISSION_TYPE_NODE_IDENTIFIERS = {
     'loginFlows': 'friendlyname'
 };
 
-export default class SalesforcePermissionsService {
-    static merge(profileMetadatas, permissionSetMetadatas) {
+export default class SalesforcePermissionsService extends SalesforceService {
+    constructor(serverHost, sessionId) {
+        super(serverHost, sessionId);
+    }
+
+    async getProfileName(profileId) {
+        const profileQuery = `SELECT FullName FROM Profile WHERE Id = '${profileId}'`;
+        const profileQueryResult = await this.query(profileQuery, true);
+        if (!profileQueryResult.success) {
+            return profileQueryResult;
+        }
+
+        return {
+            success: true,
+            name: profileQueryResult.records[0]['FullName']
+        };
+    }
+
+    async getPermissionSetNames(userId, excludeManaged = true) {
+        let permissionSetQuery = `SELECT PermissionSet.Name, PermissionSet.Type FROM PermissionSetAssignment WHERE AssigneeId = '${userId}' AND PermissionSet.IsOwnedByProfile = false`;
+        if (excludeManaged) {
+            permissionSetQuery += ' AND PermissionSet.NamespacePrefix = \'\'';
+        }
+
+        const permissionSetQueryResult = await this.query(permissionSetQuery);
+        if (!permissionSetQueryResult.success) {
+            return permissionSetQueryResult;
+        }
+
+        const names = [];
+
+        for (const permSetAssignmentRecord of permissionSetQueryResult.records) {
+            const name = permSetAssignmentRecord['PermissionSet']['Name'];
+
+            // If it's a permission set group, we also need to query to see what permission sets are in the group.
+            const type = permSetAssignmentRecord['PermissionSet']['Type'];
+            if (type === 'Group') {
+                const permSetGroupCompQuery = `SELECT PermissionSet.Name FROM PermissionSetGroupComponent WHERE PermissionSetGroup.DeveloperName = '${name}'`;
+                const permSetGroupCompQueryResult = await this.query(permSetGroupCompQuery);
+                if (!permSetGroupCompQueryResult.success) {
+                    return permSetGroupCompQueryResult;
+                }
+
+                for (const permSetGroupCompRecord of permSetGroupCompQueryResult.records) {
+                    const innerName = permSetGroupCompRecord['PermissionSet']['Name'];
+                    names.push(innerName);
+                }
+            } else  {
+                names.push(name);
+            }
+        }
+
+        return {
+            success: true,
+            names: names
+        }
+    }
+
+    merge(profileMetadatas, permissionSetMetadatas) {
         const merged = { };
 
         const allMetadatas = profileMetadatas.concat(permissionSetMetadatas);

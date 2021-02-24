@@ -15,8 +15,7 @@
         </template>
 
         <template #row-details="row">
-            {{ row.item.name }}
-            <permission-table></permission-table>
+            <permission-table :permissions="row.item.permissions"></permission-table>
         </template>
     </b-table>
 </template>
