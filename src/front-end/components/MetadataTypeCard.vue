@@ -1,9 +1,9 @@
 <template>
-    <div class="card mb-2" v-if="type.items.length > 0">
-        <div class="card-header border-bottom-0" @click="onCollapseClick">
+    <div class="card mb-2">
+        <div v-bind:class="headerClasses" @click="onCollapseClick">
             <b-icon-plus scale="1.5" v-if="type.collapsed"></b-icon-plus>
             <b-icon-dash scale="1.5" v-else></b-icon-dash>
-            <span class="ml-1">{{ type.name | metadataNodeNameToLabel }} - {{ type.items.length }} results</span>
+            <span class="ml-1">{{ type.name | metadataNodeNameToLabel }} - {{ visibleItemCount }} results</span>
         </div>
         <div class="card-body p-0" v-if="!type.collapsed">
             <field-permissions-item-table v-if="type.name === 'fieldPermissions'" :items="type.items"></field-permissions-item-table>
@@ -40,10 +40,24 @@
             FieldPermissionsItemTable
         },
         props: ['type'],
-        data: function() {
-            return {
-                
-            };
+        computed: {
+            visibleItemCount: function() {
+                return this.type.items.filter(item => item._visible).length;
+            },
+            enabled: function() {
+                return this.visibleItemCount > 0;
+            },
+            headerClasses: function() {
+                let baseClasses = 'card-header border-bottom-0';
+
+                if (this.enabled) {
+                    baseClasses += ' card-header-enabled';
+                } else {
+                    baseClasses += ' card-header-disabled';
+                }
+
+                return baseClasses;
+            }
         },
         filters: {
             metadataNodeNameToLabel: function(value) {
@@ -54,15 +68,25 @@
         },
         methods: {
             onCollapseClick: function() {
-                this.type.collapsed = !this.type.collapsed;
+                if (this.enabled) {
+                    this.type.collapsed = !this.type.collapsed;
+                }
             }
         }
     };
 </script>
 
 <style scoped>
-.card-header {
+.card-header-enabled {
     cursor: pointer;
+}
+
+.card-header-disabled {
+    cursor: not-allowed;
+    color: #888 !important;
+}
+
+.card-header {
     padding: .5rem .75rem !important;
 }
 </style>

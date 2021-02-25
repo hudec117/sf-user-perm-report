@@ -4,7 +4,6 @@
                             :key="metadataType.name"
                             :type="metadataType">
         </metadata-type-card>
-        <h4 v-if="metadataTypes.length === 0" class="text-center">No search results</h4>
     </div>
 </template>
 
@@ -24,17 +23,6 @@
         },
         watch: {
             tree: function() {
-                this.recalculateMetadataTypes();
-            },
-            options: {
-                handler: function() {
-                    this.recalculateMetadataTypes();
-                },
-                deep: true
-            }
-        },
-        methods: {
-            recalculateMetadataTypes: function() {
                 this.metadataTypes = [];
                 this.permissionSetNames = [];
 
@@ -49,25 +37,22 @@
                     for (const itemName of Object.keys(type)) {
                         const item = this.tree[typeName][itemName];
 
-                        const shouldAddRow = this.searchItemName(itemName);
+                        // Create new row for the item and push it to the array.
+                        // (This allows it to be displayed using a Bootstrap-Vue table)
+                        const row = {
+                            name: itemName,
+                            permissions: item,
+                            _visible: true,
+                            _showDetails: false
+                        };
 
-                        if (shouldAddRow) {
-                            // Create new row for the item and push it to the array.
-                            // (This allows it to be displayed using a Bootstrap-Vue table)
-                            const row = {
-                                name: itemName,
-                                permissions: item,
-                                _showDetails: false
-                            };
+                        metadataTypeRow.items.push(row);
 
-                            metadataTypeRow.items.push(row);
-
-                            // Dig down to permission sets and get unique names
-                            for (const permission of Object.values(item)) {
-                                for (const permissionSetName of Object.keys(permission)) {
-                                    if (!this.permissionSetNames.includes(permissionSetName)) {
-                                        this.permissionSetNames.push(permissionSetName);
-                                    }
+                        // Dig down to permission sets and get unique names
+                        for (const permission of Object.values(item)) {
+                            for (const permissionSetName of Object.keys(permission)) {
+                                if (!this.permissionSetNames.includes(permissionSetName)) {
+                                    this.permissionSetNames.push(permissionSetName);
                                 }
                             }
                         }
@@ -75,11 +60,28 @@
 
                     this.metadataTypes.push(metadataTypeRow);
                 }
+
+                this.searchMetadataTypes();
             },
-            searchItemName: function(itemName) {
+            options: {
+                handler: function() {
+                    this.searchMetadataTypes();
+                },
+                deep: true
+            }
+        },
+        methods: {
+            searchMetadataTypes: function() {
+                for (const metadataType of this.metadataTypes) {
+                    for (const item of metadataType.items) {
+                        item._visible = this.determineItemVisiblity(metadataType, item);
+                    }
+                }
+            },
+            determineItemVisiblity: function(metadataType, item) {
                 if (!this.options.managed) {
                     for (const managedPrefix of this.options.managedPrefixes) {
-                        if (itemName.startsWith(managedPrefix + '__')) {
+                        if (item.name.startsWith(managedPrefix + '__')) {
                             return false;
                         }
                     }
@@ -88,7 +90,13 @@
                 const shouldSearch = this.options.search;
                 if (shouldSearch) {
                     if (this.options.search) {
-                        if (itemName.includes(this.options.search)) {
+                        let toSearch = item.name;
+
+                        if (metadataType.name === 'fieldPermissions') {
+                            toSearch = toSearch.split('.')[1];
+                        }
+
+                        if (toSearch.includes(this.options.search)) {
                             return true;
                         }
                     }

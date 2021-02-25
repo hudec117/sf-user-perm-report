@@ -56,10 +56,13 @@
             };
         },
         computed: {
+            searchedItems: function() {
+                return this.items.filter(item => item._visible);
+            },
             objects: function() {
                 const objectLookup = new Map();
 
-                for (const item of this.items) {
+                for (const item of this.searchedItems) {
                     const parts = item.name.split('.');
                     const objectName = parts[0];
                     const fieldName = parts[1];
@@ -77,9 +80,9 @@
                     const objectRow = objectLookup.get(objectName);
 
                     objectRow.fields.push({
-                        _showDetails: false,
                         name: fieldName,
-                        permissions: item.permissions
+                        permissions: item.permissions,
+                        _showDetails: false
                     });
                 }
 

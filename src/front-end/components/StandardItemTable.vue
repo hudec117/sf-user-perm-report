@@ -1,5 +1,5 @@
 <template>
-    <b-table :items="items"
+    <b-table :items="searchedItems"
              :fields="itemFields"
              @row-clicked="onRowClick"
              primary-key="name"
@@ -38,6 +38,11 @@
                     }
                 ]
             };
+        },
+        computed: {
+            searchedItems: function() {
+                return this.items.filter(item => item._visible);
+            }
         },
         methods: {
             onRowClick: function(item) {
