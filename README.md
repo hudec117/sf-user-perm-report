@@ -24,7 +24,15 @@ Roadmap
  - Dynamic Salesforce API selection
  - Various QoL & UI improvements
  
+<br />
+
+**See Q&A below for "Not Compatible" error on Chrome Web Store.**
+
+<br />
+
 ## Download
+
+Please ensure you are running Chrome 88 or later.
 
 <a href="https://chrome.google.com/webstore/detail/salesforce-user-permissio/gkibdicghcpcikhjpgjoijpobdipklnp">
 
@@ -49,6 +57,16 @@ Navigate to any user detail record in Classic or Lightning and click the "Open P
 </p>
 
 ## Q&A
+
+**Q**: I can't install the extension because it says "Not Compatible" on Chrome Web Store?
+
+**A**: The extension requires Chrome 88 or later, to make sure you're on the latest Chrome version:
+1. At the top right, click the 3 vertical dots.
+2. Click Help -> About Google Chrome.
+3. Wait for Chrome to download update.
+4. Relaunch Chrome.
+
+<br />
 
 **Q**: What does "Session expired or invalid"/"INVALID_SESSION_ID" mean?
 
