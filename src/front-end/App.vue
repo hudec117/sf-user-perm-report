@@ -32,7 +32,7 @@
             </b-col>
             <b-col sm="auto" class="pr-0">
                 <b-form-checkbox name="check-button" v-model="tableOptions.managed" :disabled="!canRefreshReport" button>
-                    Show Managed Metadata
+                    {{ tableOptions.managed ? 'Hide' : 'Show' }} Managed Metadata
                 </b-form-checkbox>
             </b-col>
             <b-col>
@@ -164,7 +164,7 @@
                     return;
                 }
 
-                this.managedPrefixes = namespacePrefixResult.prefixes;
+                this.tableOptions.managedPrefixes = namespacePrefixResult.prefixes;
 
                 this.page.progress = 'Reading profile...';
 

@@ -1,9 +1,9 @@
 <template>
-    <div class="card mb-2">
+    <div class="card mb-2" v-if="type.items.length > 0">
         <div class="card-header border-bottom-0" @click="onCollapseClick">
             <b-icon-plus scale="1.5" v-if="type.collapsed"></b-icon-plus>
             <b-icon-dash scale="1.5" v-else></b-icon-dash>
-            <span class="ml-1">{{ type.name | metadataNodeNameToLabel }}</span>
+            <span class="ml-1">{{ type.name | metadataNodeNameToLabel }} - {{ type.items.length }} results</span>
         </div>
         <div class="card-body p-0" v-if="!type.collapsed">
             <field-permissions-item-table v-if="type.name === 'fieldPermissions'" :items="type.items"></field-permissions-item-table>

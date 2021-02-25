@@ -1,10 +1,10 @@
 <template>
     <div>
-        <metadata-type-card v-for="metadataType of searchedMetadataTypes"
+        <metadata-type-card v-for="metadataType of metadataTypes"
                             :key="metadataType.name"
                             :type="metadataType">
         </metadata-type-card>
-        <h4 v-if="searchedMetadataTypes.length === 0" class="text-center">No search results</h4>
+        <h4 v-if="metadataTypes.length === 0" class="text-center">No search results</h4>
     </div>
 </template>
 
@@ -23,36 +23,51 @@
             };
         },
         watch: {
-            tree: function(newSummary) {
+            tree: function() {
+                this.recalculateMetadataTypes();
+            },
+            options: {
+                handler: function() {
+                    this.recalculateMetadataTypes();
+                },
+                deep: true
+            }
+        },
+        methods: {
+            recalculateMetadataTypes: function() {
                 this.metadataTypes = [];
                 this.permissionSetNames = [];
 
-                for (const typeName of Object.keys(newSummary)) {
+                for (const typeName of Object.keys(this.tree)) {
                     const metadataTypeRow = {
                         name: typeName,
                         collapsed: true,
                         items: []
                     };
 
-                    const type = newSummary[typeName];
+                    const type = this.tree[typeName];
                     for (const itemName of Object.keys(type)) {
-                        const item = newSummary[typeName][itemName];
+                        const item = this.tree[typeName][itemName];
 
-                        // Create new row for the item and push it to the array.
-                        // (This allows it to be displayed using a Bootstrap-Vue table)
-                        const row = {
-                            name: itemName,
-                            permissions: item,
-                            _showDetails: false
-                        };
+                        const shouldAddRow = this.searchItemName(itemName);
 
-                        metadataTypeRow.items.push(row);
+                        if (shouldAddRow) {
+                            // Create new row for the item and push it to the array.
+                            // (This allows it to be displayed using a Bootstrap-Vue table)
+                            const row = {
+                                name: itemName,
+                                permissions: item,
+                                _showDetails: false
+                            };
 
-                        // Dig down to permission sets and get unique names
-                        for (const permission of Object.values(item)) {
-                            for (const permissionSetName of Object.keys(permission)) {
-                                if (!this.permissionSetNames.includes(permissionSetName)) {
-                                    this.permissionSetNames.push(permissionSetName);
+                            metadataTypeRow.items.push(row);
+
+                            // Dig down to permission sets and get unique names
+                            for (const permission of Object.values(item)) {
+                                for (const permissionSetName of Object.keys(permission)) {
+                                    if (!this.permissionSetNames.includes(permissionSetName)) {
+                                        this.permissionSetNames.push(permissionSetName);
+                                    }
                                 }
                             }
                         }
@@ -60,28 +75,29 @@
 
                     this.metadataTypes.push(metadataTypeRow);
                 }
-            }
-        },
-        computed: {
-            searchedMetadataTypes: function() {
-                const searched = [];
-
-                for (const metadataType of this.metadataTypes) {
-                    for (const item of metadataType.items) {
-                        if (this.options.search) {
-                            // TODO
-                        }
-
-                        if (this.options.managed) {
-                            // TODO
+            },
+            searchItemName: function(itemName) {
+                if (!this.options.managed) {
+                    for (const managedPrefix of this.options.managedPrefixes) {
+                        if (itemName.startsWith(managedPrefix + '__')) {
+                            return false;
                         }
                     }
                 }
 
-                return searched;
-            }
-        },
-        methods: {
+                const shouldSearch = this.options.search;
+                if (shouldSearch) {
+                    if (this.options.search) {
+                        if (itemName.includes(this.options.search)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+                return true;
+            },
             setTypeCollapse: function(collapsed) {
                 for (const metadataType of this.metadataTypes) {
                     metadataType.collapsed = collapsed;
