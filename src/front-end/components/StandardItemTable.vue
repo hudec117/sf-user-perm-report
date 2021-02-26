@@ -1,5 +1,5 @@
 <template>
-    <b-table :items="searchedItems"
+    <b-table :items="visibleItems"
              :fields="itemFields"
              @row-clicked="onRowClick"
              primary-key="name"
@@ -33,14 +33,12 @@
                         key: 'show_details',
                         tdClass: 'collapse-cell'
                     },
-                    {
-                        key: 'name'
-                    }
+                    'name'
                 ]
             };
         },
         computed: {
-            searchedItems: function() {
+            visibleItems: function() {
                 return this.items.filter(item => item._visible);
             }
         },
@@ -51,3 +49,9 @@
         }
     };
 </script>
+
+<style>
+.padded-row {
+    padding-left: 2rem !important;
+}
+</style>

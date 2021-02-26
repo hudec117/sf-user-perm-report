@@ -49,20 +49,18 @@
                         key: 'show_details',
                         tdClass: 'collapse-cell'
                     },
-                    {
-                        key: 'name'
-                    }
+                    'name'
                 ]
             };
         },
         computed: {
-            searchedItems: function() {
+            visibleItems: function() {
                 return this.items.filter(item => item._visible);
             },
             objects: function() {
                 const objectLookup = new Map();
 
-                for (const item of this.searchedItems) {
+                for (const item of this.visibleItems) {
                     const parts = item.name.split('.');
                     const objectName = parts[0];
                     const fieldName = parts[1];

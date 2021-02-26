@@ -74,7 +74,6 @@
                     id: '',
                     name: ''
                 },
-                sessionId: '',
                 tableOptions: {
                     search: '',
                     managed: false,
@@ -119,10 +118,8 @@
                         return;
                     }
 
-                    self.sessionId = session.id;
-
                     // Initialise Salesforce service
-                    Vue.prototype.$salesforceService = new SalesforcePermissionsService(self.serverHost, self.sessionId);
+                    Vue.prototype.$salesforceService = new SalesforcePermissionsService(self.serverHost, session.id);
 
                     // Run the report
                     await self.runReport();

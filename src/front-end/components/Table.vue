@@ -17,8 +17,7 @@
         props: ['tree', 'options'],
         data: function() {
             return {
-                metadataTypes: [],
-                permissionSetNames: []
+                metadataTypes: []
             };
         },
         watch: {
@@ -126,29 +125,21 @@
 </script>
 
 <style>
+.b-table-details > td {
+    padding-left: 4rem !important;
+}
+
+/* Below are used by StandardItemTable and FieldPermissionsItemTable */
+.collapse-cell {
+    width: 50px;
+    padding-left: 2rem !important;
+}
+
 .hidden-header {
     display: none;
 }
 
 .clickable-row:not(.b-table-details) {
     cursor: pointer;
-}
-
-.b-table-details > td {
-    padding-left: 4rem !important;
-}
-
-.padded-row {
-    padding-left: 2rem !important;
-}
-
-.collapse-cell {
-    width: 50px;
-    padding-left: 2rem !important;
-}
-
-.fit-column {
-    width: 1%;
-    min-width: 165px;
 }
 </style>
