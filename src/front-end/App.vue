@@ -78,7 +78,8 @@
                 tableOptions: {
                     search: '',
                     managed: false,
-                    managedPrefixes: []
+                    managedPrefixes: [],
+                    permissionSetNames: []
                 },
                 tree: { }
             };
@@ -156,6 +157,8 @@
                     this.page.alert = permissionSetResult.error;
                     return;
                 }
+
+                this.tableOptions.permissionSetNames = [profileResult.name].concat(permissionSetResult.names);
 
                 // Get managed package namespace prefixes
                 const namespacePrefixResult = await this.$salesforceService.getManagedPrefixes();

@@ -35,27 +35,18 @@
 
                     const type = this.tree[typeName];
                     for (const itemName of Object.keys(type)) {
-                        const item = this.tree[typeName][itemName];
+                        const permissions = this.tree[typeName][itemName];
 
                         // Create new row for the item and push it to the array.
                         // (This allows it to be displayed using a Bootstrap-Vue table)
                         const row = {
                             name: itemName,
-                            permissions: item,
+                            permissions: this.generatePermissionsTable(permissions),
                             _visible: true,
                             _showDetails: false
                         };
 
                         metadataTypeRow.items.push(row);
-
-                        // Dig down to permission sets and get unique names
-                        for (const permission of Object.values(item)) {
-                            for (const permissionSetName of Object.keys(permission)) {
-                                if (!this.permissionSetNames.includes(permissionSetName)) {
-                                    this.permissionSetNames.push(permissionSetName);
-                                }
-                            }
-                        }
                     }
 
                     this.metadataTypes.push(metadataTypeRow);
@@ -105,6 +96,25 @@
                 }
 
                 return true;
+            },
+            generatePermissionsTable: function(permissions) {
+                const table = [];
+
+                for (const permissionSetName of this.options.permissionSetNames) {
+                    const row = {
+                        name: permissionSetName
+                    };
+
+                    for (const permissionName of Object.keys(permissions)) {
+                        const permission = permissions[permissionName];
+
+                        row[permissionName] = permission[permissionSetName];
+                    }
+
+                    table.push(row);
+                }
+
+                return table;
             },
             setTypeCollapse: function(collapsed) {
                 for (const metadataType of this.metadataTypes) {
