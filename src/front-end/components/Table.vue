@@ -63,8 +63,18 @@
         methods: {
             searchMetadataTypes: function() {
                 for (const metadataType of this.metadataTypes) {
+                    let anyVisible = false;
+
                     for (const item of metadataType.items) {
                         item._visible = this.determineItemVisiblity(metadataType, item);
+
+                        if (item._visible) {
+                            anyVisible = true;
+                        }
+                    }
+
+                    if (!anyVisible) {
+                        metadataType.collapsed = true;
                     }
                 }
             },
@@ -82,11 +92,12 @@
                     if (this.options.search) {
                         let toSearch = item.name;
 
-                        if (metadataType.name === 'fieldPermissions') {
+                        // For field permissions and record type visibilities only search the field/record type name
+                        if (metadataType.name === 'fieldPermissions' || metadataType.Name == 'recordTypeVisibilities') {
                             toSearch = toSearch.split('.')[1];
                         }
 
-                        if (toSearch.includes(this.options.search)) {
+                        if (toSearch.toLowerCase().includes(this.options.search.toLowerCase())) {
                             return true;
                         }
                     }
@@ -117,7 +128,10 @@
             },
             setTypeCollapse: function(collapsed) {
                 for (const metadataType of this.metadataTypes) {
-                    metadataType.collapsed = collapsed;
+                    const enabled = metadataType.items.filter(item => item._visible).length > 0;
+                    if (enabled) {
+                        metadataType.collapsed = collapsed;
+                    }
                 }
             }
         }
@@ -125,10 +139,6 @@
 </script>
 
 <style>
-.b-table-details > td {
-    padding-left: 4rem !important;
-}
-
 /* Below are used by StandardItemTable and FieldPermissionsItemTable */
 .collapse-cell {
     width: 50px;

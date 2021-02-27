@@ -1,6 +1,6 @@
 <template>
     <b-table :items="objects"
-             :fields="itemFields"
+             :fields="objectFields"
              @row-clicked="onRowClick"
              primary-key="name"
              thead-class="hidden-header"
@@ -14,24 +14,28 @@
         </template>
 
         <template #row-details="objectRow">
-            <b-table :items="objectRow.item.fields"
-                     :fields="itemFields"
-                     @row-clicked="onRowClick"
-                     primary-key="name"
-                     thead-class="hidden-header"
-                     tbody-tr-class="clickable-row"
-                     table-class="mb-0"
-                     fixed
-                     small>
-                <template #cell(show_details)="fieldRow">
-                    <b-icon-plus scale="1.5" v-if="!fieldRow.detailsShowing"></b-icon-plus>
-                    <b-icon-dash scale="1.5" v-else></b-icon-dash>
-                </template>
+            <div class="pl-5">
+                <b-table :items="objectRow.item.fields"
+                        :fields="fieldFields"
+                        @row-clicked="onRowClick"
+                        primary-key="name"
+                        thead-class="hidden-header"
+                        tbody-tr-class="clickable-row"
+                        table-class="mb-0"
+                        fixed
+                        small>
+                    <template #cell(show_details)="fieldRow">
+                        <b-icon-plus scale="1.5" v-if="!fieldRow.detailsShowing"></b-icon-plus>
+                        <b-icon-dash scale="1.5" v-else></b-icon-dash>
+                    </template>
 
-                <template #row-details="row">
-                    <permission-table :permissions="row.item.permissions"></permission-table>
-                </template>
-            </b-table>
+                    <template #row-details="row">
+                        <div class="pl-4">
+                            <permission-table :permissions="row.item.permissions"></permission-table>
+                        </div>
+                    </template>
+                </b-table>
+            </div>
         </template>
     </b-table>
 </template>
@@ -44,10 +48,17 @@
         props: ['items'],
         data: function() {
             return {
-                itemFields: [
+                objectFields: [
                     {
                         key: 'show_details',
                         tdClass: 'collapse-cell'
+                    },
+                    'name'
+                ],
+                fieldFields: [
+                    {
+                        key: 'show_details',
+                        tdClass: 'collapse-cell-inner'
                     },
                     'name'
                 ]
@@ -94,3 +105,9 @@
         }
     };
 </script>
+
+<style>
+.collapse-cell-inner {
+    width: 25px;
+}
+</style>

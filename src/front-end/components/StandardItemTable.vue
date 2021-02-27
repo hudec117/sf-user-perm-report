@@ -15,7 +15,9 @@
         </template>
 
         <template #row-details="row">
-            <permission-table :permissions="row.item.permissions"></permission-table>
+            <div class="pl-4">
+                <permission-table :permissions="row.item.permissions"></permission-table>
+            </div>
         </template>
     </b-table>
 </template>
