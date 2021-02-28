@@ -183,7 +183,7 @@
                     return;
                 }
 
-                this.page.progress = 'Merging metadata...';
+                this.page.progress = 'Merging...';
 
                 // Merge metadata into one data structure
                 this.tree = this.$salesforceService.merge(profileReadResult.records, permissionSetsReadResult.records);
