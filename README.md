@@ -5,13 +5,25 @@
 
 Salesforce User Permission Report allows you to see a report of all the permissions a user has and where they are set.
 
-#### Features
+Features
  - Search
  - Dark mode
  - Intuitive tree view
+ - Toggle managed metadata
+ - Permission Set Group support
  - Consolidated view of user permissions
  - Compatible with Classic and Lightning Experience
 
+Roadmap
+ - Firefox support
+ - Edge support
+ - Modifying & saving permissions
+ - Toggle between labels and full names
+ - Toggle showing only granted permissions
+ - Rendering performance improvements
+ - Dynamic Salesforce API selection
+ - Various QoL & UI improvements
+ 
 <br />
 
 **See Q&A below for "Not Compatible" error on Chrome Web Store.**
@@ -64,7 +76,7 @@ Navigate to any user detail record in Classic or Lightning and click the "Open P
 
 **Q**: Is this extension available on Edge/Firefox/Safari?
 
-**A**: I plan on making the extension available on the latest Edge and Firefox versions. I do not have a Mac so I'm not planning for Safari support - if anyone does have a Mac and wants to work on Safari Support, please reach out.
+**A**: I plan on making the extension available on the latest Edge and Firefox versions. I do not have a Mac so I'm not planning for Safari support.
 
 ## Support
 
