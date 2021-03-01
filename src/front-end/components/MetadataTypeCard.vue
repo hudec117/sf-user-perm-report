@@ -1,5 +1,5 @@
 <template>
-    <div class="card mb-2">
+    <div class="card mb-2" v-show="visibleItemCount > 0">
         <div v-bind:class="headerClasses" @click="onCollapseClick">
             <b-icon-plus scale="1.5" v-if="type.collapsed"></b-icon-plus>
             <b-icon-dash scale="1.5" v-else></b-icon-dash>
