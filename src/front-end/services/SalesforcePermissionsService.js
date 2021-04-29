@@ -55,7 +55,7 @@ export default class SalesforcePermissionsService extends SalesforceService {
             // If it's a permission set group, we also need to query to see what permission sets are in the group.
             const type = permSetAssignmentRecord['PermissionSet']['Type'];
             if (type === 'Group') {
-                const permSetGroupCompQuery = `SELECT PermissionSet.Name FROM PermissionSetGroupComponent WHERE PermissionSetGroup.DeveloperName = '${name}'`;
+                const permSetGroupCompQuery = `SELECT PermissionSet.Name FROM PermissionSetGroupComponent WHERE PermissionSetGroup.DeveloperName = '${name}' AND Permissionset.Name != ''`;
                 const permSetGroupCompQueryResult = await this.query(permSetGroupCompQuery);
                 if (!permSetGroupCompQueryResult.success) {
                     return permSetGroupCompQueryResult;
