@@ -16,9 +16,6 @@
     "background": {
         "service_worker": "background.js"
     },
-    "content_security_policy": {
-        "extension_pages": "script-src 'self' http://localhost:8098; object-src 'self'"
-    },
     "content_scripts": [
         {
             "matches": [ "https://*.my.salesforce.com/*" ],
