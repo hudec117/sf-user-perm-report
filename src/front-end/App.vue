@@ -7,7 +7,12 @@
         </b-row>
         <b-row class="mt-3">
             <b-col sm="auto" class="pr-0">
-                <b-button variant="primary" :disabled="!canRefreshReport" @click="onRefreshClick"  v-b-tooltip.hover.bottom title="Refresh">
+                <b-button variant="primary" @click="onOpenUserClick" v-b-tooltip.hover.bottom title="Open user detail in a new tab">
+                    <b-icon-person></b-icon-person> Open user
+                </b-button>
+            </b-col>
+            <b-col sm="auto" class="pr-0">
+                <b-button variant="primary" :disabled="!canRefreshReport" @click="onRefreshClick" v-b-tooltip.hover.bottom :title="page.state === 'loading' ? 'This may take a while!' : 'Refresh'">
                     <b-icon-arrow-clockwise class="mr-2" :animation="refreshIconAnimation"></b-icon-arrow-clockwise> {{ page.state === 'loading' ? page.progress : user.name }}
                 </b-button>
             </b-col>
@@ -32,7 +37,7 @@
             </b-col>
             <b-col sm="auto" class="pr-0">
                 <b-form-checkbox name="check-button" v-model="tableOptions.managed" :disabled="!canRefreshReport" button>
-                    {{ tableOptions.managed ? 'Hide' : 'Show' }} Managed Metadata
+                    {{ tableOptions.managed ? 'Hide' : 'Show' }} managed metadata
                 </b-form-checkbox>
             </b-col>
             <b-col>
@@ -139,6 +144,7 @@
 
                 const userRecord = userQueryResult.records[0];
                 this.user.name = userRecord['Username'];
+                document.title = this.user.name;
 
                 // Get the profile full name
                 const profileId = userRecord['ProfileId'];
@@ -189,6 +195,9 @@
                 this.tree = this.$salesforceService.merge(profileReadResult.records, permissionSetsReadResult.records);
 
                 this.page.state = 'ready';
+            },
+            onOpenUserClick: function() {
+                window.open(`https://${this.serverHost}/${this.user.id}?noredirect=1`);
             },
             onRefreshClick: async function() {
                 this.tree = { };
