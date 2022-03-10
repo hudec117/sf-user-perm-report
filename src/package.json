@@ -10,8 +10,8 @@
     "license": "MIT",
     "devDependencies": {
         "babel-loader": "^8.2.2",
-        "css-loader": "^5.0.1",
-        "style-loader": "^2.0.0",
+        "css-loader": "^6.7.1",
+        "style-loader": "^3.3.1",
         "vue-loader": "^15.9.6",
         "vue-style-loader": "^4.1.2",
         "vue-template-compiler": "^2.6.12",
@@ -21,7 +21,7 @@
     },
     "dependencies": {
         "bootstrap-vue": "^2.21.2",
-        "bootswatch": "^4.6.0",
-        "vue": "^2.6.12"
+        "bootswatch": "^4.6.1",
+        "vue": "^2.6.14"
     }
 }
