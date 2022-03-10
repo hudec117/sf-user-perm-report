@@ -74,6 +74,12 @@ Navigate to any user detail record in Classic or Lightning and click the "Open P
 
 <br />
 
+**Q**: Why does it take so long to load?
+
+**A**: Some requests made to Salesforce are made to the Tooling API which can be significantly slower than expected. Requests are also made to the Metadata SOAP API which is also slow.
+
+<br />
+
 **Q**: Is this extension available on Edge/Firefox/Safari?
 
 **A**: I plan on making the extension available on the latest Edge and Firefox versions. I do not have a Mac so I'm not planning for Safari support.
