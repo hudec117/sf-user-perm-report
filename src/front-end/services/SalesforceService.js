@@ -1,6 +1,6 @@
-const METADATA_ENDPOINT = '/services/Soap/m/51.0';
-const QUERY_ENDPOINT = '/services/data/v51.0/query';
-const TOOLING_QUERY_ENDPOINT = '/services/data/v51.0/tooling/query';
+const METADATA_ENDPOINT = '/services/Soap/m/54.0';
+const QUERY_ENDPOINT = '/services/data/v54.0/query';
+const TOOLING_QUERY_ENDPOINT = '/services/data/v54.0/tooling/query';
 
 export default class SalesforceService {
     constructor(serverHost, sessionId) {
