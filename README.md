@@ -15,14 +15,15 @@ Features
  - Compatible with Classic and Lightning Experience
 
 Roadmap
- - Firefox support
- - Edge support
+ - ✅ Edge support
+ - 🔄 Opera support
+ - 🔄 Firefox support
+ - 🔄 Various QoL & UI improvements
  - Modifying & saving permissions
  - Toggle between labels and full names
  - Toggle showing only granted permissions
  - Rendering performance improvements
  - Dynamic Salesforce API selection
- - Various QoL & UI improvements
  
 <br />
 
@@ -32,7 +33,7 @@ Roadmap
 
 ## Download
 
-Please ensure you are running Chrome 88 or later.
+This extension is compatible with: Chrome 88, Edge 88, Opera 74 or later.
 
 <a href="https://chrome.google.com/webstore/detail/salesforce-user-permissio/gkibdicghcpcikhjpgjoijpobdipklnp">
 
