@@ -1,7 +1,7 @@
 # SUPR - Salesforce User Permission Report
 
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/v/gkibdicghcpcikhjpgjoijpobdipklnp?style=flat-square)
-![Chrome Web Store](https://img.shields.io/chrome-web-store/users/gkibdicghcpcikhjpgjoijpobdipklnp)
+![Edge Add-ons](https://img.shields.io/badge/edge%20add--ons-v1.2.1-blue?style=flat-square)
 
 Salesforce User Permission Report allows you to see a report of all the permissions a user has and where they are set.
 
@@ -15,14 +15,15 @@ Features
  - Compatible with Classic and Lightning Experience
 
 Roadmap
- - Firefox support
- - Edge support
+ - ✅ Edge support
+ - 🔄 Opera support
+ - 🔄 Firefox support
+ - 🔄 Various QoL & UI improvements
  - Modifying & saving permissions
  - Toggle between labels and full names
  - Toggle showing only granted permissions
  - Rendering performance improvements
  - Dynamic Salesforce API selection
- - Various QoL & UI improvements
  
 <br />
 
@@ -32,11 +33,17 @@ Roadmap
 
 ## Download
 
-Please ensure you are running Chrome 88 or later.
+This extension is compatible with: Chrome 88, Edge 88 or later.
 
 <a href="https://chrome.google.com/webstore/detail/salesforce-user-permissio/gkibdicghcpcikhjpgjoijpobdipklnp">
 
 ![Chrome Web Store](https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/mPGKYBIR2uCP0ApchDXE.png)
+
+</a>
+
+<a href="https://microsoftedge.microsoft.com/addons/detail/pmmmcgfoemljdfcjcifnepmomnkcghjl">
+
+![Chrome Web Store](/branding/edge.png)
 
 </a>
 
