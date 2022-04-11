@@ -194,10 +194,15 @@
 
                 this.page.progress = 'Merging...';
 
-                // Merge metadata into one data structure
-                this.tree = this.$salesforceService.merge(profileReadResult.records, permissionSetsReadResult.records);
+                try {
+                    // Merge metadata into one data structure
+                    this.tree = this.$salesforceService.merge(profileReadResult.records, permissionSetsReadResult.records);
 
-                this.page.state = 'ready';
+                    this.page.state = 'ready';
+                } catch (error) {
+                    this.page.alert = `${error.message} See console for details.`;
+                    console.error(error);
+                }
             },
             onOpenUserClick: function() {
                 let userRelUrl = `/${this.user.id}?noredirect=1&isUserEntityOverride=1`;
