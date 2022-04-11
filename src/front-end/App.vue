@@ -75,10 +75,10 @@
                     alert: ''
                 },
                 serverHost: '',
+                openUserInLex: false,
                 user: {
                     id: '',
-                    name: '',
-                    usesLex: true
+                    name: ''
                 },
                 tableOptions: {
                     search: '',
@@ -127,6 +127,19 @@
                     // Initialise Salesforce service
                     Vue.prototype.$salesforceService = new SalesforcePermissionsService(self.serverHost, session.id);
 
+                    self.page.progress = 'Getting session user info...';
+
+                    // Get user info from session
+                    const sessionUserInfo = await self.$salesforceService.getUserInfo();
+                    const sessionUserQuery = `SELECT UserPreferencesLightningExperiencePreferred FROM User WHERE Id = '${sessionUserInfo.userId}'`;
+                    const sessionUserQueryResult = await self.$salesforceService.query(sessionUserQuery);
+                    if (!sessionUserQueryResult.success) {
+                        self.page.alert = sessionUserQueryResult.error;
+                        return;
+                    }
+
+                    self.openUserInLex = sessionUserQueryResult.records[0]['UserPreferencesLightningExperiencePreferred'];
+
                     // Run the report
                     await self.runReport();
                 });
@@ -136,7 +149,7 @@
                 this.page.progress = 'Querying user info...';
 
                 // Get the users name and profile ID
-                const userQuery = `SELECT Username, ProfileId, UserPreferencesLightningExperiencePreferred FROM User WHERE Id = '${this.user.id}'`;
+                const userQuery = `SELECT Username, ProfileId FROM User WHERE Id = '${this.user.id}'`;
                 const userQueryResult = await this.$salesforceService.query(userQuery);
                 if (!userQueryResult.success) {
                     this.page.alert = userQueryResult.error;
@@ -146,8 +159,6 @@
                 const userRecord = userQueryResult.records[0];
                 this.user.name = userRecord['Username'];
                 document.title = this.user.name;
-
-                this.user.usesLex = userRecord['UserPreferencesLightningExperiencePreferred'];
 
                 // Get the profile full name
                 const profileId = userRecord['ProfileId'];
@@ -207,7 +218,7 @@
             onOpenUserClick: function() {
                 let userRelUrl = `/${this.user.id}?noredirect=1&isUserEntityOverride=1`;
 
-                if (this.user.usesLex) {
+                if (this.openUserInLex) {
                     userRelUrl = '/lightning/setup/ManageUsers/page?address=' + encodeURIComponent(userRelUrl);
                 }
 

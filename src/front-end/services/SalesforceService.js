@@ -1,4 +1,5 @@
 const METADATA_ENDPOINT = '/services/Soap/m/54.0';
+const PARTNER_ENDPOINT = '/services/Soap/u/54.0';
 const QUERY_ENDPOINT = '/services/data/v54.0/query';
 const TOOLING_QUERY_ENDPOINT = '/services/data/v54.0/tooling/query';
 
@@ -85,6 +86,35 @@ export default class SalesforceService {
         };
     }
 
+    async getUserInfo() {
+        const message = this._constructGetUserInfoMessage();
+
+        const requestUrl = new URL(PARTNER_ENDPOINT, this.serverBaseUrl);
+        const response = await fetch(requestUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/xml',
+                'SOAPAction': '""'
+            },
+            body: message
+        });
+
+        const responseXmlRaw = await response.text();
+
+        const responseXml = new window.DOMParser().parseFromString(responseXmlRaw, 'text/xml');
+
+        if (!response.ok) {
+            return this._constructResultFromMetadataFault(responseXml);
+        }
+
+        const resultNode = responseXml.querySelectorAll('Envelope Body getUserInfoResponse result')[0];
+
+        return Array.from(resultNode.childNodes).reduce((prev, curr) => {
+            prev[curr.nodeName] = curr.textContent;
+            return prev;
+        }, {});
+    }
+
     async getManagedPrefixes() {
         const namespacePrefixQuery = 'SELECT SubscriberPackage.NamespacePrefix FROM InstalledSubscriberPackage';
         const namespacePrefixQueryResult = await this.query(namespacePrefixQuery, true);
@@ -109,8 +139,7 @@ export default class SalesforceService {
                     <sessionId>${this.sessionId}</sessionId>
                 </SessionHeader>
             </soapenv:Header>
-            <soapenv:Body
-                xmlns="http://soap.sforce.com/2006/04/metadata">
+            <soapenv:Body xmlns="http://soap.sforce.com/2006/04/metadata">
                 <readMetadata>
                     <type>${type}</type>`;
 
@@ -120,6 +149,25 @@ export default class SalesforceService {
 
         message += `
                 </readMetadata>
+            </soapenv:Body>
+        </soapenv:Envelope>`;
+
+        return message.trim();
+    }
+
+    _constructGetUserInfoMessage() {
+        let message = `
+        <?xml version="1.0" encoding="UTF-8"?>
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <soapenv:Header xmlns="urn:partner.soap.sforce.com">
+                <SessionHeader>
+                    <sessionId>${this.sessionId}</sessionId>
+                </SessionHeader>
+            </soapenv:Header>
+            <soapenv:Body xmlns="urn:partner.soap.sforce.com">
+                <getUserInfo />
             </soapenv:Body>
         </soapenv:Envelope>`;
 
