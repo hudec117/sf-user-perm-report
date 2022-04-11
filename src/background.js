@@ -1,4 +1,4 @@
-const USER_PERM_REPORT_PAGE = 'public/report-page.html';
+const USER_PERM_REPORT_PAGE = 'report.html';
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.operation == 'open-report') {

@@ -24,5 +24,5 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - Browser version [e.g. 88.0.4324.150]
+ - Browser type and version [e.g. Chrome 88.0.4324.150]
  - Extension version [e.g. 1.0.0]

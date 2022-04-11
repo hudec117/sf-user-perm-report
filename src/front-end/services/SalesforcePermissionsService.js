@@ -14,8 +14,7 @@ const PERMISSION_TYPE_NODE_IDENTIFIERS = {
     'flowAccesses': 'flow',
     'pageAccesses': 'apexPage',
     'recordTypeVisibilities': 'recordType',
-    'categoryGroupVisibilities': 'dataCategoryGroup',
-    'loginFlows': 'friendlyname'
+    'categoryGroupVisibilities': 'dataCategoryGroup'
 };
 
 export default class SalesforcePermissionsService extends SalesforceService {
@@ -98,13 +97,32 @@ export default class SalesforcePermissionsService extends SalesforceService {
 
         // Merge each profile/permission set metadata
         for (const metadata of allMetadatas) {
-            // Get profile/permission set name and label
-            const metadataName = metadata.getElementsByTagName('fullName')[0].textContent;
-            let metadataLabel = metadataName;
 
+            // Get profile/permission set full name
+            let metadataName;
+            try {
+                metadataName = metadata.getElementsByTagName('fullName')[0].textContent;
+            } catch (error) {
+                throw {
+                    message: 'Failed to retrieve metadata full name',
+                    error,
+                    metadata
+                };
+            }
+
+            // Get profile/permission set label
+            let metadataLabel = metadataName;
             const labelElements = metadata.getElementsByTagName('label');
             if (labelElements.length > 0) {
-                metadataLabel = labelElements[0].textContent;
+                try {
+                    metadataLabel = labelElements[0].textContent;
+                } catch (error) {
+                    throw {
+                        message: 'Failed to retrieve metadata label',
+                        error,
+                        metadata
+                    };
+                }
             }
 
             const permissionTypeNodes = metadata.childNodes;
@@ -121,7 +139,16 @@ export default class SalesforcePermissionsService extends SalesforceService {
 
                 // Find permission node unique identifier
                 const identifierNodeName = PERMISSION_TYPE_NODE_IDENTIFIERS[permissionTypeName];
-                const itemName = permissionTypeNode.getElementsByTagName(identifierNodeName)[0].textContent;
+                let itemName;
+                try {
+                    itemName = permissionTypeNode.getElementsByTagName(identifierNodeName)[0].textContent;
+                } catch (error) {
+                    throw {
+                        message: `Failed to retrieve item name for ${permissionTypeName} with identifier node name ${identifierNodeName}`,
+                        error,
+                        permissionTypeNode
+                    };
+                }
 
                 if (!(itemName in merged[permissionTypeName])) {
                     merged[permissionTypeName][itemName] = { };
@@ -131,6 +158,7 @@ export default class SalesforcePermissionsService extends SalesforceService {
                 const permissionNodes = permissionTypeNode.querySelectorAll(`*:not(${identifierNodeName})`);
                 for (const permissionNode of permissionNodes) {
                     const permissionName = permissionNode.tagName;
+
                     const permissionValue = permissionNode.textContent;
 
                     if (!(permissionName in merged[permissionTypeName][itemName])) {

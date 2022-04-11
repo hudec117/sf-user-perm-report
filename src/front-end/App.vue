@@ -77,7 +77,8 @@
                 serverHost: '',
                 user: {
                     id: '',
-                    name: ''
+                    name: '',
+                    usesLex: true
                 },
                 tableOptions: {
                     search: '',
@@ -135,7 +136,7 @@
                 this.page.progress = 'Querying user info...';
 
                 // Get the users name and profile ID
-                const userQuery = `SELECT Username, ProfileId FROM User WHERE Id = '${this.user.id}'`;
+                const userQuery = `SELECT Username, ProfileId, UserPreferencesLightningExperiencePreferred FROM User WHERE Id = '${this.user.id}'`;
                 const userQueryResult = await this.$salesforceService.query(userQuery);
                 if (!userQueryResult.success) {
                     this.page.alert = userQueryResult.error;
@@ -145,6 +146,8 @@
                 const userRecord = userQueryResult.records[0];
                 this.user.name = userRecord['Username'];
                 document.title = this.user.name;
+
+                this.user.usesLex = userRecord['UserPreferencesLightningExperiencePreferred'];
 
                 // Get the profile full name
                 const profileId = userRecord['ProfileId'];
@@ -191,13 +194,24 @@
 
                 this.page.progress = 'Merging...';
 
-                // Merge metadata into one data structure
-                this.tree = this.$salesforceService.merge(profileReadResult.records, permissionSetsReadResult.records);
+                try {
+                    // Merge metadata into one data structure
+                    this.tree = this.$salesforceService.merge(profileReadResult.records, permissionSetsReadResult.records);
 
-                this.page.state = 'ready';
+                    this.page.state = 'ready';
+                } catch (error) {
+                    this.page.alert = `${error.message} See console for details.`;
+                    console.error(error);
+                }
             },
             onOpenUserClick: function() {
-                window.open(`https://${this.serverHost}/${this.user.id}?noredirect=1`);
+                let userRelUrl = `/${this.user.id}?noredirect=1&isUserEntityOverride=1`;
+
+                if (this.user.usesLex) {
+                    userRelUrl = '/lightning/setup/ManageUsers/page?address=' + encodeURIComponent(userRelUrl);
+                }
+
+                window.open(`https://${this.serverHost}${userRelUrl}`);
             },
             onRefreshClick: async function() {
                 this.tree = { };

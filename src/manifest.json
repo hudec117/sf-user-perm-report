@@ -1,12 +1,19 @@
 {
     "name": "SUPR - Salesforce User Permission Report",
+    "short_name": "SUPR",
     "description": "Salesforce User Permission Report allows you to see a report of all the permissions a user has and where they are set.",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "author": "Aurel Hudec",
     "homepage_url": "https://github.com/hudec117/sf-user-perm-report",
     "incognito": "split",
     "minimum_chrome_version": "88",
     "manifest_version": 3,
+    "icons": {
+        "16": "icons/16-icon.png",
+        "32": "icons/32-icon.png",
+        "48": "icons/48-icon.png",
+        "128": "icons/128-icon.png"
+    },
     "permissions": [
         "cookies"
     ],

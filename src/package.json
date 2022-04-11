@@ -1,10 +1,10 @@
 {
     "name": "salesforce-user-perm-report",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "Salesforce User Permission Report allows you to see a report of all the permissions a user has and where they are set.",
     "scripts": {
         "dev": "webpack --watch --config webpack.dev.js",
-        "build": "webpack --config webpack.prod.js"
+        "prod": "webpack --config webpack.prod.js"
     },
     "author": "Aurel Hudec",
     "license": "MIT",
