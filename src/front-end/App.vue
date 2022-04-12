@@ -2,7 +2,10 @@
     <b-container fluid>
         <b-row>
             <b-col>
-                <b-alert variant="warning" :show="page.alert !== ''" class="mb-0 mt-3">{{ page.alert }}</b-alert>
+                <b-alert variant="warning" :show="page.fault !== ''" class="mb-0 mt-3">
+                    <template v-if="page.fault === 'sf:INVALID_SESSION_ID'">Your session has timed out. <a :href="'https://' + serverHost">Login to Salesforce</a> and open this again from the User detail page.</template>
+                    <template v-else>{{ alertMessageLookup[page.fault] }}</template>
+                </b-alert>
             </b-col>
         </b-row>
         <b-row class="mt-3">
@@ -69,10 +72,16 @@
         },
         data() {
             return {
+                alertMessageLookup: {
+                    'supr:MISSING_SERVER_HOST': 'Missing server host, please launch the report from a user record.',
+                    'supr:MISSING_USER_ID': 'Missing user ID, please launch the report from a user record.',
+                    'supr:MISSING_SESSION_ID': 'Missing session ID, please check you\'re logged in and launch the report from a user record.',
+                    'supr:FAILED_MERGE': 'Failed to merge, see console for details.'
+                },
                 page: {
                     state: 'loading',
                     progress: '',
-                    alert: ''
+                    fault: ''
                 },
                 serverHost: '',
                 openUserInLex: false,
@@ -106,13 +115,13 @@
                 const params = new URLSearchParams(window.location.search);
                 this.serverHost = params.get('host');
                 if (!this.serverHost) {
-                    this.page.alert = 'Missing server host, please launch the report from a user record.';
+                    this.page.fault = 'supr:MISSING_SERVER_HOST';
                     return;
                 }
 
                 this.user.id = params.get('user');
                 if (!this.user.id) {
-                    this.page.alert = 'Missing user ID, please launch the report from a user record.';
+                    this.page.fault = 'supr:MISSING_USER_ID';
                     return;
                 }
 
@@ -120,7 +129,7 @@
                 const self = this;
                 chrome.runtime.sendMessage({ operation: 'get-session', host: this.serverHost }, async function(session) {
                     if (!session.id) {
-                        self.alert = 'Missing session ID, your sesion may have expired or you\'ve been logged out. Log back in and refresh.';
+                        self.page.fault = 'supr:MISSING_SESSION_ID';
                         return;
                     }
 
@@ -130,11 +139,16 @@
                     self.page.progress = 'Getting session user info...';
 
                     // Get user info from session
-                    const sessionUserInfo = await self.$salesforceService.getUserInfo();
-                    const sessionUserQuery = `SELECT UserPreferencesLightningExperiencePreferred FROM User WHERE Id = '${sessionUserInfo.userId}'`;
+                    const getSessionUserInfoResult = await self.$salesforceService.getUserInfo();
+                    if (!getSessionUserInfoResult.success) {
+                        self.alertErrorResult(getSessionUserInfoResult);
+                        return;
+                    }
+
+                    const sessionUserQuery = `SELECT UserPreferencesLightningExperiencePreferred FROM User WHERE Id = '${getSessionUserInfoResult.userInfo.userId}'`;
                     const sessionUserQueryResult = await self.$salesforceService.query(sessionUserQuery);
                     if (!sessionUserQueryResult.success) {
-                        self.page.alert = sessionUserQueryResult.error;
+                        self.alertErrorResult(sessionUserQueryResult);
                         return;
                     }
 
@@ -152,7 +166,7 @@
                 const userQuery = `SELECT Username, ProfileId FROM User WHERE Id = '${this.user.id}'`;
                 const userQueryResult = await this.$salesforceService.query(userQuery);
                 if (!userQueryResult.success) {
-                    this.page.alert = userQueryResult.error;
+                    this.alertErrorResult(userQueryResult);
                     return;
                 }
 
@@ -164,14 +178,14 @@
                 const profileId = userRecord['ProfileId'];
                 const profileResult = await this.$salesforceService.getProfileName(profileId);
                 if (!profileResult.success) {
-                    this.page.alert = profileResult.error;
+                    this.alertErrorResult(profileResult);
                     return;
                 }
 
                 // Get the permission set full names
                 const permissionSetResult = await this.$salesforceService.getPermissionSetNames(this.user.id);
                 if (!permissionSetResult.success) {
-                    this.page.alert = permissionSetResult.error;
+                    this.alertErrorResult(permissionSetResult);
                     return;
                 }
 
@@ -180,7 +194,7 @@
                 // Get managed package namespace prefixes
                 const namespacePrefixResult = await this.$salesforceService.getManagedPrefixes();
                 if (!namespacePrefixResult.success) {
-                    this.page.alert = namespacePrefixResult.error;
+                    this.alertErrorResult(namespacePrefixResult);
                     return;
                 }
 
@@ -191,7 +205,7 @@
                 // Read profile and permission set metadata
                 const profileReadResult = await this.$salesforceService.readMetadata('Profile', [profileResult.name]);
                 if (!profileReadResult.success) {
-                    this.page.alert = profileReadResult.error;
+                    this.alertErrorResult(profileReadResult);
                     return;
                 }
 
@@ -199,7 +213,7 @@
                     this.page.progress = `Reading permission sets... (${metadataRead}/${permissionSetResult.names.length})`;
                 });
                 if (!permissionSetsReadResult.success) {
-                    this.page.alert = permissionSetsReadResult.error;
+                    this.alertErrorResult(permissionSetsReadResult);
                     return;
                 }
 
@@ -211,9 +225,12 @@
 
                     this.page.state = 'ready';
                 } catch (error) {
-                    this.page.alert = `${error.message} See console for details.`;
+                    this.page.fault = 'supr:FAILED_MERGE';
                     console.error(error);
                 }
+            },
+            alertErrorResult: function(result) {
+                this.page.fault = result.faultCode;
             },
             onOpenUserClick: function() {
                 let userRelUrl = `/${this.user.id}?noredirect=1&isUserEntityOverride=1`;

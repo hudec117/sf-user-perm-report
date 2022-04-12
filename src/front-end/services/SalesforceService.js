@@ -68,7 +68,7 @@ export default class SalesforceService {
             const responseXml = new window.DOMParser().parseFromString(responseXmlRaw, 'text/xml');
 
             if (!response.ok) {
-                return this._constructResultFromMetadataFault(responseXml);
+                return this._constructResultFromSoapFault(responseXml);
             }
 
             const recordNodes = responseXml.querySelectorAll('Envelope Body readMetadataResponse result records');
@@ -104,15 +104,18 @@ export default class SalesforceService {
         const responseXml = new window.DOMParser().parseFromString(responseXmlRaw, 'text/xml');
 
         if (!response.ok) {
-            return this._constructResultFromMetadataFault(responseXml);
+            return this._constructResultFromSoapFault(responseXml);
         }
 
         const resultNode = responseXml.querySelectorAll('Envelope Body getUserInfoResponse result')[0];
 
-        return Array.from(resultNode.childNodes).reduce((prev, curr) => {
-            prev[curr.nodeName] = curr.textContent;
-            return prev;
-        }, {});
+        return {
+            success: true,
+            userInfo: Array.from(resultNode.childNodes).reduce((prev, curr) => {
+                prev[curr.nodeName] = curr.textContent;
+                return prev;
+            }, {})
+        }
     }
 
     async getManagedPrefixes() {
@@ -184,7 +187,7 @@ export default class SalesforceService {
         });
     }
 
-    _constructResultFromMetadataFault(responseXml) {
+    _constructResultFromSoapFault(responseXml) {
         const faultNodes = responseXml.querySelectorAll('Envelope Body Fault faultcode');
 
         let faultCode = 'unknown';
@@ -194,7 +197,8 @@ export default class SalesforceService {
 
         return {
             success: false,
-            error: `Metadata operation failed with fault ${faultCode}`
+            error: `SOAP operation failed`,
+            faultCode: faultCode
         };
     }
 }
