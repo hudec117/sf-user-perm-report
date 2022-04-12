@@ -23,7 +23,6 @@
         watch: {
             tree: function() {
                 this.metadataTypes = [];
-                this.permissionSetNames = [];
 
                 for (const typeName of Object.keys(this.tree)) {
                     const metadataTypeRow = {

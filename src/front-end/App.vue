@@ -39,7 +39,7 @@
                 </b-button-group>
             </b-col>
             <b-col sm="auto" class="pr-0">
-                <b-form-checkbox name="check-button" v-model="tableOptions.managed" :disabled="!canRefreshReport" button>
+                <b-form-checkbox name="check-button" v-model="tableOptions.managed" :disabled="!canToggleManagedMetadata" button>
                     {{ tableOptions.managed ? 'Hide' : 'Show' }} managed metadata
                 </b-form-checkbox>
             </b-col>
@@ -101,6 +101,9 @@
         computed: {
             canRefreshReport: function() {
                 return this.page.state === 'ready';
+            },
+            canToggleManagedMetadata: function() {
+                return this.canRefreshReport && this.tableOptions.managedPrefixes.length > 0;
             },
             refreshIconAnimation: function() {
                 return this.page.state === 'loading' ? 'spin' : '';
@@ -172,7 +175,7 @@
 
                 const userRecord = userQueryResult.records[0];
                 this.user.name = userRecord['Username'];
-                document.title = this.user.name;
+                document.title = `Loading: ${this.user.name}`;
 
                 // Get the profile full name
                 const profileId = userRecord['ProfileId'];
@@ -224,6 +227,7 @@
                     this.tree = this.$salesforceService.merge(profileReadResult.records, permissionSetsReadResult.records);
 
                     this.page.state = 'ready';
+                    document.title = `Ready: ${this.user.name}`;
                 } catch (error) {
                     this.page.fault = 'supr:FAILED_MERGE';
                     console.error(error);
