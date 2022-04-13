@@ -1,58 +1,60 @@
 <template>
     <b-container fluid>
-        <b-row>
-            <b-col>
-                <b-alert variant="warning" :show="page.fault !== ''" class="mb-0 mt-3">
-                    <template v-if="page.fault === 'sf:INVALID_SESSION_ID'">Your session has timed out. <a :href="'https://' + serverHost">Login to Salesforce</a> and open this again from the User detail page.</template>
-                    <template v-else>{{ alertMessageLookup[page.fault] }}</template>
-                </b-alert>
-            </b-col>
-        </b-row>
-        <b-row class="mt-3">
-            <b-col sm="auto" class="pr-0">
-                <b-button variant="primary" @click="onOpenUserClick" v-b-tooltip.hover.bottom title="Open user detail in a new tab">
-                    <b-icon-person></b-icon-person> Open user
-                </b-button>
-            </b-col>
-            <b-col sm="auto" class="pr-0">
-                <b-button variant="primary" :disabled="!canRefreshReport" @click="onRefreshClick" v-b-tooltip.hover.bottom :title="page.state === 'loading' ? 'This may take a while!' : 'Refresh'">
-                    <b-icon-arrow-clockwise class="mr-2" :animation="refreshIconAnimation"></b-icon-arrow-clockwise> {{ page.state === 'loading' ? page.progress : user.name }}
-                </b-button>
-            </b-col>
-            <b-col sm="auto" class="pr-0">
-                <b-button-group>
-                    <b-button variant="secondary"
-                              :disabled="!canRefreshReport"
-                              @click="onExpandAllClick"
-                              v-b-tooltip.hover.bottom
-                              title="Expand All"
-                              class="mr-1">
-                        <b-icon-plus></b-icon-plus>
+        <div class="p-3 fixed-top bg-dark border-bottom border-secondary">
+            <b-row>
+                <b-col>
+                    <b-alert variant="warning" :show="page.fault !== ''">
+                        <template v-if="page.fault === 'sf:INVALID_SESSION_ID'">Your session has timed out. <a target="_blank" :href="'https://' + serverHost">Login to Salesforce</a> and refresh.</template>
+                        <template v-else>{{ alertMessageLookup[page.fault] }}</template>
+                    </b-alert>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col sm="auto" class="pr-0">
+                    <b-button variant="primary" @click="onOpenUserClick" v-b-tooltip.hover.bottom title="Open user detail in a new tab">
+                        <b-icon-person></b-icon-person> Open user
                     </b-button>
-                    <b-button variant="secondary"
-                              :disabled="!canRefreshReport"
-                              @click="onCollapseAllClick"
-                              v-b-tooltip.hover.bottom
-                              title="Collapse All">
-                        <b-icon-dash></b-icon-dash>
+                </b-col>
+                <b-col sm="auto" class="pr-0">
+                    <b-button variant="primary" :disabled="!canRefreshReport" @click="onRefreshClick" v-b-tooltip.hover.bottom :title="page.state === 'loading' ? 'This may take a while!' : 'Refresh'">
+                        <b-icon-arrow-clockwise class="mr-2" :animation="refreshIconAnimation"></b-icon-arrow-clockwise> {{ page.state === 'loading' ? page.progress : user.name }}
                     </b-button>
-                </b-button-group>
-            </b-col>
-            <b-col sm="auto" class="pr-0">
-                <b-form-checkbox name="check-button" v-model="tableOptions.managed" :disabled="!canToggleManagedMetadata" button>
-                    {{ tableOptions.managed ? 'Hide' : 'Show' }} managed metadata
-                </b-form-checkbox>
-            </b-col>
-            <b-col>
-                <b-input type="search"
-                         :value="tableOptions.search"
-                         :disabled="!canRefreshReport"
-                         placeholder="Search metadata..."
-                         @search="onSearchUpdate">
-                </b-input>
-            </b-col>
-        </b-row>
-        <b-row class="mt-3">
+                </b-col>
+                <b-col sm="auto" class="pr-0">
+                    <b-button-group>
+                        <b-button variant="secondary"
+                                :disabled="!canRefreshReport"
+                                @click="onExpandAllClick"
+                                v-b-tooltip.hover.bottom
+                                title="Expand All"
+                                class="mr-1">
+                            <b-icon-plus></b-icon-plus>
+                        </b-button>
+                        <b-button variant="secondary"
+                                :disabled="!canRefreshReport"
+                                @click="onCollapseAllClick"
+                                v-b-tooltip.hover.bottom
+                                title="Collapse All">
+                            <b-icon-dash></b-icon-dash>
+                        </b-button>
+                    </b-button-group>
+                </b-col>
+                <b-col sm="auto" class="pr-0">
+                    <b-form-checkbox name="check-button" v-model="tableOptions.managed" :disabled="!canToggleManagedMetadata" button>
+                        {{ tableOptions.managed ? 'Hide' : 'Show' }} managed metadata
+                    </b-form-checkbox>
+                </b-col>
+                <b-col>
+                    <b-input type="search"
+                            :value="tableOptions.search"
+                            :disabled="!canRefreshReport"
+                            placeholder="Search metadata..."
+                            @search="onSearchUpdate">
+                    </b-input>
+                </b-col>
+            </b-row>
+        </div>
+        <b-row class="table-row">
             <b-col>
                 <Table ref="table" :tree="tree" :options="tableOptions"></Table>
             </b-col>
@@ -75,7 +77,6 @@
                 alertMessageLookup: {
                     'supr:MISSING_SERVER_HOST': 'Missing server host, please launch the report from a user record.',
                     'supr:MISSING_USER_ID': 'Missing user ID, please launch the report from a user record.',
-                    'supr:MISSING_SESSION_ID': 'Missing session ID, please check you\'re logged in and launch the report from a user record.',
                     'supr:FAILED_MERGE': 'Failed to merge, see console for details.'
                 },
                 page: {
@@ -132,7 +133,7 @@
                 const self = this;
                 chrome.runtime.sendMessage({ operation: 'get-session', host: this.serverHost }, async function(session) {
                     if (!session.id) {
-                        self.page.fault = 'supr:MISSING_SESSION_ID';
+                        self.page.fault = 'sf:INVALID_SESSION_ID';
                         return;
                     }
 
@@ -268,3 +269,9 @@
         }
     };
 </script>
+
+<style>
+    .table-row {
+        margin-top: 5.5rem;
+    }
+</style>
