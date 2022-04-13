@@ -3,7 +3,7 @@
         <div class="p-3 fixed-top bg-dark border-bottom border-secondary">
             <b-row>
                 <b-col>
-                    <b-alert variant="warning" :show="page.fault !== ''">
+                    <b-alert variant="danger" :show="page.fault !== ''">
                         <template v-if="page.fault === 'sf:INVALID_SESSION_ID'">Your session has timed out. <a target="_blank" :href="'https://' + serverHost">Login to Salesforce</a> and refresh.</template>
                         <template v-else>{{ alertMessageLookup[page.fault] }}</template>
                     </b-alert>
@@ -77,6 +77,7 @@
                 alertMessageLookup: {
                     'supr:MISSING_SERVER_HOST': 'Missing server host, please launch the report from a user record.',
                     'supr:MISSING_USER_ID': 'Missing user ID, please launch the report from a user record.',
+                    'supr:MISSING_PERMS': 'Missing system permissions to generate report, make sure you have at least the Download AppExchange Packages permission. This is required to query the managed packages you have installed to support toggling between unmanaged and managed metadata.',
                     'supr:FAILED_MERGE': 'Failed to merge, see console for details.'
                 },
                 page: {
@@ -140,27 +141,53 @@
                     // Initialise Salesforce service
                     Vue.prototype.$salesforceService = new SalesforcePermissionsService(self.serverHost, session.id);
 
-                    self.page.progress = 'Getting session user info...';
-
-                    // Get user info from session
-                    const getSessionUserInfoResult = await self.$salesforceService.getUserInfo();
-                    if (!getSessionUserInfoResult.success) {
-                        self.alertErrorResult(getSessionUserInfoResult);
-                        return;
+                    if (await self.sessionUserHasPermissions()) {
+                        await self.runReport();
+                    } else {
+                        self.page.fault = 'supr:MISSING_PERMS';
                     }
-
-                    const sessionUserQuery = `SELECT UserPreferencesLightningExperiencePreferred FROM User WHERE Id = '${getSessionUserInfoResult.userInfo.userId}'`;
-                    const sessionUserQueryResult = await self.$salesforceService.query(sessionUserQuery);
-                    if (!sessionUserQueryResult.success) {
-                        self.alertErrorResult(sessionUserQueryResult);
-                        return;
-                    }
-
-                    self.openUserInLex = sessionUserQueryResult.records[0]['UserPreferencesLightningExperiencePreferred'];
-
-                    // Run the report
-                    await self.runReport();
                 });
+            },
+            sessionUserHasPermissions: async function() {
+                this.page.progress = 'Getting session user info...';
+
+                // Get user info from session
+                const getSessionUserInfoResult = await this.$salesforceService.getUserInfo();
+                if (!getSessionUserInfoResult.success) {
+                    this.alertErrorResult(getSessionUserInfoResult);
+                    return false;
+                }
+
+                this.page.progress = 'Checking session user permissions...';
+
+                // Get User LEX/Classic preference and Download AppExchange Packages system permission.
+                const sessionUserId = getSessionUserInfoResult.userInfo.userId;
+                const sessionUserQuery = `SELECT UserPreferencesLightningExperiencePreferred, Profile.PermissionsInstallMultiforce FROM User WHERE Id = '${sessionUserId}'`;
+                const sessionUserQueryResult = await this.$salesforceService.query(sessionUserQuery);
+                if (!sessionUserQueryResult.success) {
+                    this.alertErrorResult(sessionUserQueryResult);
+                    return false;
+                }
+
+                const userRecord = sessionUserQueryResult.records[0];
+
+                this.openUserInLex = userRecord['UserPreferencesLightningExperiencePreferred'];
+
+                // If the profile allow's the user to install AppExchange packages we don't need to check permission sets.
+                const canInstallExchangePackages = userRecord['Profile']['PermissionsInstallMultiforce'];
+                if (canInstallExchangePackages) {
+                    return true;
+                } else {
+                    // Check if any of the user's permission sets allow the user to install AppExchange packages.
+                    const sessionUserPermissionSetQuery = `SELECT PermissionSet.PermissionsInstallPackaging FROM PermissionSetAssignment WHERE AssigneeId = '${sessionUserId}'`;
+                    const sessionUserPermissionSetQueryResult = await this.$salesforceService.query(sessionUserPermissionSetQuery);
+                    if (!sessionUserPermissionSetQueryResult.success) {
+                        this.alertErrorResult(sessionUserPermissionSetQueryResult);
+                        return false;
+                    }
+
+                    return sessionUserPermissionSetQueryResult.records.filter(record => record['PermissionSet']['PermissionsInstallPackaging'] === true).length > 0;
+                }
             },
             runReport: async function() {
                 this.page.state = 'loading';
