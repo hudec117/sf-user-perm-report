@@ -1,7 +1,7 @@
 # SUPR - Salesforce User Permission Report
 
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/v/gkibdicghcpcikhjpgjoijpobdipklnp?style=flat-square)
-![Edge Add-ons](https://img.shields.io/badge/edge%20add--ons-v1.2.1-blue?style=flat-square)
+![Edge Add-ons](https://img.shields.io/badge/edge%20add--ons-v1.2.2-blue?style=flat-square)
 
 Salesforce User Permission Report allows you to see a report of all the permissions a user has and where they are set.
 
