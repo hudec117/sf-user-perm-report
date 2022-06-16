@@ -16,9 +16,8 @@ Features
 
 Roadmap
  - ✅ Edge support
- - 🔄 Opera support
- - 🔄 Firefox support
- - 🔄 Various QoL & UI improvements
+ - ✅ Various QoL & UI improvements
+ - 🔄 Firefox support (likely next year when Firefox adds manifest v3 support)
  - Modifying & saving permissions
  - Toggle between labels and full names
  - Toggle showing only granted permissions
@@ -87,9 +86,9 @@ Navigate to any user detail record in Classic or Lightning and click the "Open P
 
 <br />
 
-**Q**: Is this extension available on Edge/Firefox/Safari?
+**Q**: Is this extension available on Firefox/Safari?
 
-**A**: I plan on making the extension available on the latest Edge and Firefox versions. I do not have a Mac so I'm not planning for Safari support.
+**A**: I plan on making the extension available on Firefox. I do not have a Mac so I'm not planning for Safari support.
 
 ## Support
 
