@@ -30,8 +30,7 @@
         'flowAccesses': 'Flow Accesses',
         'pageAccesses': 'Visualforce Accesses',
         'recordTypeVisibilities': 'Record Type Visibilities',
-        'categoryGroupVisibilities': 'Category Group Visibilities',
-        'loginFlows': 'Login Flows'
+        'categoryGroupVisibilities': 'Category Group Visibilities'
     };
 
     export default {
