@@ -35,11 +35,8 @@ export default class SalesforcePermissionsService extends SalesforceService {
         };
     }
 
-    async getPermissionSetNames(userId, excludeManaged = true) {
-        let permissionSetQuery = `SELECT PermissionSet.Name, PermissionSet.Type FROM PermissionSetAssignment WHERE AssigneeId = '${userId}' AND PermissionSet.IsOwnedByProfile = false`;
-        if (excludeManaged) {
-            permissionSetQuery += ' AND PermissionSet.NamespacePrefix = \'\'';
-        }
+    async getPermissionSetNames(userId) {
+        let permissionSetQuery = `SELECT PermissionSet.Name, PermissionSet.Type FROM PermissionSetAssignment WHERE AssigneeId = '${userId}' AND PermissionSet.IsOwnedByProfile = false AND PermissionSet.NamespacePrefix = ''`;
 
         const permissionSetQueryResult = await this.query(permissionSetQuery);
         if (!permissionSetQueryResult.success) {
@@ -54,7 +51,7 @@ export default class SalesforcePermissionsService extends SalesforceService {
             // If it's a permission set group, we also need to query to see what permission sets are in the group.
             const type = permSetAssignmentRecord['PermissionSet']['Type'];
             if (type === 'Group') {
-                const permSetGroupCompQuery = `SELECT PermissionSet.Name FROM PermissionSetGroupComponent WHERE PermissionSetGroup.DeveloperName = '${name}' AND Permissionset.Name != ''`;
+                const permSetGroupCompQuery = `SELECT PermissionSet.Name FROM PermissionSetGroupComponent WHERE PermissionSetGroup.DeveloperName = '${name}' AND PermissionSet.IsOwnedByProfile = false AND PermissionSet.NamespacePrefix = '' AND Permissionset.Name != ''`;
                 const permSetGroupCompQueryResult = await this.query(permSetGroupCompQuery);
                 if (!permSetGroupCompQueryResult.success) {
                     return permSetGroupCompQueryResult;
