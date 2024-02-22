@@ -17,16 +17,6 @@ Features
 Roadmap
  - ✅ Edge support
  - ✅ Various QoL & UI improvements
- - 🔄 Firefox support (likely next year when Firefox adds manifest v3 support)
- - Modifying & saving permissions
- - Toggle between labels and full names
- - Toggle showing only granted permissions
- - Rendering performance improvements
- - Dynamic Salesforce API selection
- 
-<br />
-
-**See Q&A below for "Not Compatible" error on Chrome Web Store.**
 
 <br />
 
