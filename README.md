@@ -62,6 +62,14 @@ Navigate to any user detail record in Classic or Lightning and click the "Open P
     <img src="branding/screenshots/object-perms.jpg" height="230">
 </p>
 
+## Security/Privacy
+
+No data is stored by the extension in the browser (apart from in-memory during use) and no data is transferred to third-party (i.e. non-Salesforce) servers. All communication is secured using HTTPS/TLS, so in theory the unencrypted (plain text) data is only visible in your Salesforce org and in the extension when it is used.
+
+A network request is made to the SOAP API's `getUserInfo` resource which may contain the running user's PII as described here: https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_calls_getuserinfo.htm
+
+The only other piece of PII is the target user's username which is queried and displayed on the refresh button.
+
 ## Q&A
 
 **Q**: I can't install the extension because it says "Not Compatible" on Chrome Web Store?
