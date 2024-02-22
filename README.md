@@ -18,8 +18,6 @@ Roadmap
  - ✅ Edge support
  - ✅ Various QoL & UI improvements
 
-<br />
-
 ## Download
 
 This extension is compatible with: Chrome 88, Edge 88 or later.
