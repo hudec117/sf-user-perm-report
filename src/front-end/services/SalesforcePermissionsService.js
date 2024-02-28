@@ -107,21 +107,6 @@ export default class SalesforcePermissionsService extends SalesforceService {
                 };
             }
 
-            // Get profile/permission set label
-            let metadataLabel = metadataName;
-            const labelElements = metadata.getElementsByTagName('label');
-            if (labelElements.length > 0) {
-                try {
-                    metadataLabel = labelElements[0].textContent;
-                } catch (error) {
-                    throw {
-                        message: 'Failed to retrieve metadata label',
-                        error,
-                        metadata
-                    };
-                }
-            }
-
             const permissionTypeNodes = metadata.childNodes;
             for (const permissionTypeNode of permissionTypeNodes) {
                 const permissionTypeName = permissionTypeNode.tagName;
