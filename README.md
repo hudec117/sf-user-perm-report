@@ -1,7 +1,7 @@
 # SUPR - Salesforce User Permission Report
 
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/v/gkibdicghcpcikhjpgjoijpobdipklnp?style=flat-square)
-![Edge Add-ons](https://img.shields.io/badge/edge%20add--ons-v1.2.3-blue?style=flat-square)
+![Edge Add-ons](https://img.shields.io/badge/edge%20add--ons-v1.2.4-blue?style=flat-square)
 
 Salesforce User Permission Report allows you to see a report of all the permissions a user has and where they are set.
 
@@ -17,18 +17,6 @@ Features
 Roadmap
  - ✅ Edge support
  - ✅ Various QoL & UI improvements
- - 🔄 Firefox support (likely next year when Firefox adds manifest v3 support)
- - Modifying & saving permissions
- - Toggle between labels and full names
- - Toggle showing only granted permissions
- - Rendering performance improvements
- - Dynamic Salesforce API selection
- 
-<br />
-
-**See Q&A below for "Not Compatible" error on Chrome Web Store.**
-
-<br />
 
 ## Download
 
@@ -61,6 +49,14 @@ Navigate to any user detail record in Classic or Lightning and click the "Open P
     <img src="branding/screenshots/filtering.jpg" height="230">
     <img src="branding/screenshots/object-perms.jpg" height="230">
 </p>
+
+## Security/Privacy
+
+No data is stored by the extension in the browser (apart from in-memory during use) and no data is transferred to third-party (i.e. non-Salesforce) servers. All communication is secured using HTTPS/TLS, so in theory the unencrypted (plain text) data is only visible in your Salesforce org and in the extension when it is used.
+
+A network request is made to the SOAP API's `getUserInfo` resource which may contain the running user's PII as described here: https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_calls_getuserinfo.htm
+
+The only other piece of PII is the target user's username which is queried and displayed on the refresh button.
 
 ## Q&A
 
