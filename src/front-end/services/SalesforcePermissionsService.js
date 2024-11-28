@@ -14,7 +14,9 @@ const PERMISSION_TYPE_NODE_IDENTIFIERS = {
     'flowAccesses': 'flow',
     'pageAccesses': 'apexPage',
     'recordTypeVisibilities': 'recordType',
-    'categoryGroupVisibilities': 'dataCategoryGroup'
+    'categoryGroupVisibilities': 'dataCategoryGroup',
+    'emailRoutingAddressAccesses': 'name',
+    'externalCredentialPrincipalAccesses': 'externalCredentialPrincipal',
 };
 
 export default class SalesforcePermissionsService extends SalesforceService {

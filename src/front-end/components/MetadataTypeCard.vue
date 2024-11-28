@@ -30,7 +30,9 @@
         'flowAccesses': 'Flow Accesses',
         'pageAccesses': 'Visualforce Accesses',
         'recordTypeVisibilities': 'Record Type Visibilities',
-        'categoryGroupVisibilities': 'Category Group Visibilities'
+        'categoryGroupVisibilities': 'Category Group Visibilities',
+        'emailRoutingAddressAccesses': 'Email Routing Address Accesses',
+        'externalCredentialPrincipalAccesses': 'External Credential Principal Accesses',
     };
 
     export default {
