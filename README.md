@@ -14,17 +14,13 @@ Features
  - Consolidated view of user permissions
  - Compatible with Classic and Lightning Experience
 
-Roadmap
- - ✅ Edge support
- - ✅ Various QoL & UI improvements
-
 ## Download
 
 This extension is compatible with: Chrome 88, Edge 88 or later.
 
 <a href="https://chrome.google.com/webstore/detail/salesforce-user-permissio/gkibdicghcpcikhjpgjoijpobdipklnp">
 
-![Chrome Web Store](https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/mPGKYBIR2uCP0ApchDXE.png)
+![Chrome Web Store](https://developer.chrome.com/static/docs/webstore/branding/image/mPGKYBIR2uCP0ApchDXE.png)
 
 </a>
 
@@ -36,7 +32,7 @@ This extension is compatible with: Chrome 88, Edge 88 or later.
 
 ## Usage
 
-Navigate to any user detail record in Classic or Lightning and click the "Open Permission Report" button next to the "Change Password" button.
+Navigate to any user detail record in Classic or Lightning and click the "Open Permission Report" button next to the "View Summary" button.
 
 ## Screenshots
 
